@@ -1,40 +1,38 @@
-import { CITY_DESCRIPTION } from "../mock/descriptions";
-import { createElement } from "../render";
+import { CITY_DESCRIPTION } from '../mock/descriptions';
+import { createElement } from '../render';
 
 
 const findDescription = (destination) => {
-  const city = CITY_DESCRIPTION.find((el) => destination === el.id)
-  
-  return city.name
-}
-  
+  const city = CITY_DESCRIPTION.find((el) => destination === el.id);
+
+  return city.name;
+};
+
 
 const createAvaibleOffers = (offer) => {
-  const offerByType = offer.offers
-  const arrayOffers = []
-  console.log(offerByType)
+  const offerByType = offer.offers;
+  const arrayOffers = [];
+  console.log(offerByType);
 
   for (let i = 0; i < offerByType.length; i++) {
     arrayOffers.push(`<li class="event__offer">
     <span class="event__offer-title">${offerByType[i].title}</span>
     &plus;&euro;&nbsp;
     <span class="event__offer-price">${offerByType[i].price}</span>
-  </li>`)
+  </li>`);
   }
 
-  return arrayOffers.join('')
-}
+  return arrayOffers.join('');
+};
 
-const isFavoriteTrip = (isFavorite) => {
-  return isFavorite === true ? '--active' : ''
-}
+const isFavoriteTrip = (isFavorite) => isFavorite === true ? '--active' : '';
 
 function createTripPoint (trip) {
 
-    const {basePrice, type, offers, destination, isFavorite} = trip
-    console.log(isFavorite);
+  const {basePrice, type, offers, destination, isFavorite} = trip;
+  console.log(isFavorite);
 
-    return `<li class="trip-events__item">
+  return `<li class="trip-events__item">
     <div class="event">
       <time class="event__date" datetime="2019-03-18">MAR 18</time>
       <div class="event__type">
@@ -66,29 +64,29 @@ function createTripPoint (trip) {
         <span class="visually-hidden">Open event</span>
       </button>
     </div>
-  </li>`
+  </li>`;
 }
 
 export default class TripPoint {
 
-    constructor ({trip}) {
-      this.trip = trip
+  constructor ({trip}) {
+    this.trip = trip;
+  }
+
+
+  getTemplate () {
+    return createTripPoint(this.trip);
+  }
+
+  getElement() {
+    if(!this.element) {
+      this.element = createElement(this.getTemplate());
     }
 
+    return this.element;
+  }
 
-    getTemplate () {
-        return createTripPoint(this.trip)
-    }
-
-    getElement() {
-        if(!this.element) {
-            this.element = createElement(this.getTemplate())
-        }
-
-        return this.element
-    }
-
-    removeElement() {
-        this.element = null
-    }
+  removeElement() {
+    this.element = null;
+  }
 }

@@ -1,23 +1,23 @@
-import { createElement } from "../render";
+import { createElement } from '../render';
 
 function createTripList () {
-    return `<ul class="trip-events__list"></ul>`
+  return '<ul class="trip-events__list"></ul>';
 }
 
 export default class TripList {
-    getTemplate() {
-        return createTripList()
+  getTemplate() {
+    return createTripList();
+  }
+
+  getElement() {
+    if(!this.element) {
+      this.element = createElement(this.getTemplate());
     }
 
-    getElement() {
-        if(!this.element) {
-            this.element = createElement(this.getTemplate())
-        }
-        
-        return this.element
-    }
+    return this.element;
+  }
 
-    removeElement () {
-        this.element = null
-    }
+  removeElement () {
+    this.element = null;
+  }
 }
