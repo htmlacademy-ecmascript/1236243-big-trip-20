@@ -1,7 +1,7 @@
-import { createElement } from "../render";
+import { createElement } from '../render';
 
 function createTripEmptyList () {
-    return `<p class="trip-events__msg">Click New Event to create your first point</p>`
+  return '<p class="trip-events__msg">Click New Event to create your first point</p>';
 }
 
 // Значение отображаемого текста зависит от выбранного фильтра:
@@ -11,19 +11,19 @@ function createTripEmptyList () {
 //               * Future — 'There are no future events now'.
 
 export default class TripEmptyList {
-    getTemplate () {
-        return createElement()
+  getTemplate () {
+    return createTripEmptyList();
+  }
+
+  getElement() {
+    if(!this.element) {
+      this.element = createElement(this.getTemplate());
     }
 
-    getElement() {
-        if(!this.element) {
-            this.element = createElement(this.getTemplate())
-        }
+    return this.element;
+  }
 
-        return this.element
-    }
-
-    removeElement() {
-        this.element = null
-    }
+  removeElement() {
+    this.element = null;
+  }
 }

@@ -1,29 +1,34 @@
-import { RenderPosition, render } from '../render.js';
-import TripView from '../view/trip-view.js';
-import TripList from '../view/trip-list.js'
+import TripList from '../view/trip-list.js';
 import TripSort from '../view/trip-sort.js';
 import TripEditPoint from '../view/trip-edit-point.js';
 import TripPoint from '../view/trip-point.js';
+import { render } from '../render.js';
 
- const TRIP = 3
 
 export default class TripPresenter {
-    tripListComponent = new TripList()
+  tripListComponent = new TripList();
 
 
-    constructor ({tripContainer}) {
-        this.tripContainer = tripContainer
+  constructor ({tripContainer, pointsModel}) {
+    this.tripContainer = tripContainer;
+    this.pointsModel = pointsModel;
+
+  }
+
+  init () {
+    this.boardTrip = [...this.pointsModel.getPoints()];
+    this.destination = [...this.pointsModel.getDescription()];
+    this.offers = [...this.pointsModel.getOffers()];
+
+
+    render(new TripSort(), this.tripContainer);
+    render(this.tripListComponent, this.tripContainer);
+    render(new TripEditPoint({trip: this.boardTrip[0], offers: this.offers, destination: this.destination}), this.tripListComponent.getElement());
+
+    for (let i = 0; i < this.boardTrip.length; i++) {
+      render(new TripPoint({trip: this.boardTrip[i], offers: this.offers, destination: this.destination}), this.tripListComponent.getElement());
     }
 
-    init () {
-        render(new TripSort(), this.tripContainer)
-        render(this.tripListComponent, this.tripContainer)
-        render(new TripEditPoint(), this.tripListComponent.getElement())
 
-        for (let i = 0; i < TRIP; i++) {
-            render(new TripPoint(), this.tripListComponent.getElement())
-        }
-        
-        
-    }
+  }
 }
