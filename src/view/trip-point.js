@@ -1,25 +1,23 @@
-import { CITY_DESCRIPTION } from '../mock/descriptions';
-import { createElement } from '../render';
+import { createElement } from '../render.js';
+import { diffTime, humanizeTaskDueDate } from '../utils.js';
 
 
-const findDescription = (destination) => {
-  const city = CITY_DESCRIPTION.find((el) => destination === el.id);
-
-  return city.name;
+const findDescription = (destination, dest) => {
+  const city = dest.find((el) => destination === el.id);
+  return city;
 };
 
+const createAvaibleOffers = (offers, offersID, type) => {
+  const offerByType = offers.find((offer) => offer.type === type).offers;
+  const offersFilter = offerByType.filter((item) => offersID.includes(item.id));
 
-const createAvaibleOffers = (offer) => {
-  const offerByType = offer.offers;
   const arrayOffers = [];
-  console.log(offerByType);
-
-  for (let i = 0; i < offerByType.length; i++) {
+  for (let i = 0; i < offersFilter.length; i++) {
     arrayOffers.push(`<li class="event__offer">
-    <span class="event__offer-title">${offerByType[i].title}</span>
-    &plus;&euro;&nbsp;
-    <span class="event__offer-price">${offerByType[i].price}</span>
-  </li>`);
+        <span class="event__offer-title">${offerByType[i].title}</span>
+        &plus;&euro;&nbsp;
+        <span class="event__offer-price">${offerByType[i].price}</span>
+      </li>`);
   }
 
   return arrayOffers.join('');
@@ -27,10 +25,13 @@ const createAvaibleOffers = (offer) => {
 
 const isFavoriteTrip = (isFavorite) => isFavorite === true ? '--active' : '';
 
-function createTripPoint (trip) {
+function createTripPoint (trip, offers, dest) {
 
-  const {basePrice, type, offers, destination, isFavorite} = trip;
-  console.log(isFavorite);
+  const {basePrice, type, offers: offersID, destination, isFavorite, dateFrom, dateTo} = trip;
+  const dateFormat = 'H:m';
+
+  const dateStart = humanizeTaskDueDate(dateFrom, dateFormat);
+  const dateEnd = humanizeTaskDueDate(dateTo, dateFormat);
 
   return `<li class="trip-events__item">
     <div class="event">
@@ -38,21 +39,21 @@ function createTripPoint (trip) {
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">${type} ${findDescription(destination)}</h3>
+      <h3 class="event__title">${type} ${findDescription(destination, dest).name}</h3>
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="2019-03-18T10:30">10:30</time>
+          <time class="event__start-time" datetime="${dateFrom}">${dateStart}</time>
           &mdash;
-          <time class="event__end-time" datetime="2019-03-18T11:00">11:00</time>
+          <time class="event__end-time" datetime="${dateTo}">${dateEnd}</time>
         </p>
-        <p class="event__duration">30M</p>
+        <p class="event__duration">${diffTime(dateFrom, dateTo)}</p>
       </div>
       <p class="event__price">
         &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-      ${createAvaibleOffers(offers)}
+        ${createAvaibleOffers(offers, offersID, type)}
       </ul>
       <button class="event__favorite-btn event__favorite-btn${isFavoriteTrip(isFavorite)}" type="button">
         <span class="visually-hidden">Add to favorite</span>
@@ -69,13 +70,15 @@ function createTripPoint (trip) {
 
 export default class TripPoint {
 
-  constructor ({trip}) {
+  constructor ({trip, offers, destination}) {
     this.trip = trip;
+    this.offer = offers;
+    this.destination = destination;
   }
 
 
   getTemplate () {
-    return createTripPoint(this.trip);
+    return createTripPoint(this.trip, this.offer, this.destination);
   }
 
   getElement() {
@@ -90,3 +93,5 @@ export default class TripPoint {
     this.element = null;
   }
 }
+
+export {findDescription};

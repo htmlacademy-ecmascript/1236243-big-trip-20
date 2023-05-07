@@ -7,6 +7,18 @@ const CITY_DESCRIPTION = [
       {
         src: `https://loremflickr.com/248/152?random=${Math.random()}`,
         description: 'London is a capital of GB'
+      },
+      {
+        src: `https://loremflickr.com/248/152?random=${Math.random()}`,
+        description: 'London is a capital of GB'
+      },
+      {
+        src: `https://loremflickr.com/248/152?random=${Math.random()}`,
+        description: 'London is a capital of GB'
+      },
+      {
+        src: `https://loremflickr.com/248/152?random=${Math.random()}`,
+        description: 'London is a capital of GB'
       }]
   },
   {
@@ -17,6 +29,14 @@ const CITY_DESCRIPTION = [
       {
         src: `https://loremflickr.com/248/152?random=${Math.random()}`,
         description: 'Berlin is beautiful city'
+      },
+      {
+        src: `https://loremflickr.com/248/152?random=${Math.random()}`,
+        description: 'London is a capital of GB'
+      },
+      {
+        src: `https://loremflickr.com/248/152?random=${Math.random()}`,
+        description: 'London is a capital of GB'
       }]
   },
   {
@@ -27,6 +47,18 @@ const CITY_DESCRIPTION = [
       {
         src: `https://loremflickr.com/248/152?random=${Math.random()}`,
         description: 'There are many bridges in Amsterdam'
+      },
+      {
+        src: `https://loremflickr.com/248/152?random=${Math.random()}`,
+        description: 'London is a capital of GB'
+      },
+      {
+        src: `https://loremflickr.com/248/152?random=${Math.random()}`,
+        description: 'London is a capital of GB'
+      },
+      {
+        src: `https://loremflickr.com/248/152?random=${Math.random()}`,
+        description: 'London is a capital of GB'
       }]
   }
 ];
