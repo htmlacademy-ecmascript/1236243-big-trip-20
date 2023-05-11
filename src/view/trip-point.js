@@ -1,5 +1,5 @@
-import { createElement } from '../render.js';
 import { diffTime, humanizeTaskDueDate } from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 
 const findDescription = (destination, dest) => {
@@ -29,7 +29,6 @@ function createTripPoint (trip, offers, dest) {
 
   const {basePrice, type, offers: offersID, destination, isFavorite, dateFrom, dateTo} = trip;
   const dateFormat = 'H:m';
-
   const dateStart = humanizeTaskDueDate(dateFrom, dateFormat);
   const dateEnd = humanizeTaskDueDate(dateTo, dateFormat);
 
@@ -68,30 +67,29 @@ function createTripPoint (trip, offers, dest) {
   </li>`;
 }
 
-export default class TripPoint {
+export default class TripPoint extends AbstractView {
+  #trip = null;
+  #offers = null;
+  #destination = null;
+  #handleClick = null;
 
-  constructor ({trip, offers, destination}) {
-    this.trip = trip;
-    this.offer = offers;
-    this.destination = destination;
+  constructor ({trip, offers, destination, onClick}) {
+    super();
+    this.#trip = trip;
+    this.#offers = offers;
+    this.#destination = destination;
+    this.#handleClick = onClick;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
   }
 
-
-  getTemplate () {
-    return createTripPoint(this.trip, this.offer, this.destination);
+  get template () {
+    return createTripPoint(this.#trip, this.#offers, this.#destination);
   }
 
-  getElement() {
-    if(!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleClick();
+  };
 }
 
 export {findDescription};

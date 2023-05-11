@@ -1,6 +1,6 @@
-import { createElement } from '../render.js';
 import { humanizeTaskDueDate } from '../utils.js';
 import { findDescription } from '../view/trip-point.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const createAvaibleOffers = (offers, offersID, type) => {
   const offerByType = offers.find((offer) => offer.type === type).offers;
@@ -116,26 +116,27 @@ function createTripEditPoint (trip, offers, dest) {
   </li>`;
 }
 
-export default class TripEditPoint {
+export default class TripEditPoint extends AbstractView {
+  #trip = null;
+  #offer = null;
+  #destination = null;
+  #handleSubmit = null;
 
-  constructor ({trip, offers, destination}) {
-    this.trip = trip;
-    this.offer = offers;
-    this.destination = destination;
+  constructor ({trip, offers, destination, onSubmit}) {
+    super();
+    this.#trip = trip;
+    this.#offer = offers;
+    this.#destination = destination;
+    this.#handleSubmit = onSubmit;
+    this.element.querySelector('.event__save-btn').addEventListener('submit', this.#submitHandler);
   }
 
-  getTemplate() {
-    return createTripEditPoint(this.trip, this.offer, this.destination);
+  get template() {
+    return createTripEditPoint(this.#trip, this.#offer, this.#destination);
   }
 
-  getElement() {
-    if(!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #submitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleSubmit();
+  };
 }
