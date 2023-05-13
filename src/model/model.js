@@ -5,19 +5,19 @@ import { getRandomPoint } from '../mock/trip.js';
 const TRIP = 3;
 
 export default class PointsModel {
-  points = Array.from({length: TRIP}, getRandomPoint);
-  offersAll = OFFERS;
-  descriptionsCity = CITY_DESCRIPTION;
+  #points = Array.from({length: TRIP}, getRandomPoint);
+  #offersAll = OFFERS;
+  #descriptionsCity = CITY_DESCRIPTION;
 
-  getPoints () {
-    return this.points;
+  get points () {
+    return this.#points;
   }
 
-  getDescription() {
-    return this.descriptionsCity;
+  get description() {
+    return this.#descriptionsCity;
   }
 
-  getOffers() {
-    return this.offersAll;
+  get offers() {
+    return this.#offersAll;
   }
 }
