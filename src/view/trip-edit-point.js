@@ -40,7 +40,7 @@ const createFotoElement = (destination, dest) => {
 
 function createTripEditPoint (trip, offers, dest) {
 
-  const {type, offers: offersID, destination, dateFrom, dateTo} = trip;
+  const {type, offers: offersID, destination, dateFrom, dateTo, basePrice} = trip;
   const dateFormat = 'DD/MM/YY HH:MM';
   const dateStart = humanizeTaskDueDate(dateFrom, dateFormat);
   const dateEnd = humanizeTaskDueDate(dateTo, dateFormat);
@@ -86,11 +86,14 @@ function createTripEditPoint (trip, offers, dest) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
         <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__rollup-btn" type="button">
+          <span class="visually-hidden">Open event</span>
+        </button>
       </header>
       <section class="event__details">
         <section class="event__section  event__section--offers">
@@ -121,14 +124,17 @@ export default class TripEditPoint extends AbstractView {
   #offer = null;
   #destination = null;
   #handleSubmit = null;
+  #handleClick = null
 
-  constructor ({trip, offers, destination, onSubmit}) {
+  constructor ({trip, offers, destination, onSubmit, onClick}) {
     super();
     this.#trip = trip;
     this.#offer = offers;
     this.#destination = destination;
     this.#handleSubmit = onSubmit;
-    this.element.querySelector('.event__save-btn').addEventListener('submit', this.#submitHandler);
+    this.#handleClick = onClick
+    this.element.querySelector('.event').addEventListener('submit', this.#submitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler)
   }
 
   get template() {
@@ -139,4 +145,9 @@ export default class TripEditPoint extends AbstractView {
     evt.preventDefault();
     this.#handleSubmit();
   };
+
+  #clickHandler = (evt) => {
+    evt.preventDefault()
+    this.#handleClick()
+  }
 }

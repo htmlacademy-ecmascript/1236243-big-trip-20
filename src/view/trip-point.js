@@ -14,9 +14,9 @@ const createAvaibleOffers = (offers, offersID, type) => {
   const arrayOffers = [];
   for (let i = 0; i < offersFilter.length; i++) {
     arrayOffers.push(`<li class="event__offer">
-        <span class="event__offer-title">${offerByType[i].title}</span>
+        <span class="event__offer-title">${offersFilter[i].title}</span>
         &plus;&euro;&nbsp;
-        <span class="event__offer-price">${offerByType[i].price}</span>
+        <span class="event__offer-price">${offersFilter[i].price}</span>
       </li>`);
   }
 

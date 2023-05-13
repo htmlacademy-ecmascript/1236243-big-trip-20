@@ -40,31 +40,32 @@ export default class TripPresenter {
       if (evt.key === 'Escape') {
         evt.preventDefault();
         replaceToTrip();
-        document.removeEventListener('keydown', escKeyHandler);
       }
     };
 
     const tripComponent = new TripPoint({trip, offers, destination, onClick: ()=>{
       replaceToEdit();
-      document.addEventListener('keydown', escKeyHandler);
     }});
 
-    const editComponent = new TripEditPoint({trip, offers, destination, onSubmit: () => {
-      escKeyHandler();
-      document.removeEventListener('keydown', escKeyHandler);
-    }});
+    const editComponent = new TripEditPoint({
+      trip,
+      offers,
+      destination,
+      onSubmit: () => {
+        replaceToTrip();
+      },
+      onClick: () => {
+        replaceToTrip()
+      }});
 
     function replaceToEdit () {
       replace(editComponent, tripComponent);
+      document.addEventListener('keydown', escKeyHandler);
     }
     function replaceToTrip () {
       replace(tripComponent, editComponent);
+      document.removeEventListener('keydown', escKeyHandler);
     }
     render(tripComponent, this.#tripListComponent.element);
   }
-
-
-  #handleSubmitClick = () => {
-
-  };
 }
