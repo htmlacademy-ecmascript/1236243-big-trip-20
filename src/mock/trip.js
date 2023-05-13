@@ -1,4 +1,4 @@
-import { getRandomArrayElement, getRandomInteger} from '../utils.js';
+import { getRandomArrayElement, getRandomInteger} from '../utils/utils.js';
 
 
 const points = [
@@ -32,7 +32,7 @@ const points = [
     destination: 3,
     isFavorite: false,
     type: 'restaurant',
-    offers: [1, 2]
+    offers: [1, 2, 4]
 
   },
   {

@@ -3,6 +3,7 @@ import TripSort from '../view/trip-sort.js';
 import TripEditPoint from '../view/trip-edit-point.js';
 import TripPoint from '../view/trip-point.js';
 import { render, replace } from '../framework/render.js';
+import TripEmptyList from '../view/trip-empty-list.js';
 
 
 export default class TripPresenter {
@@ -21,11 +22,20 @@ export default class TripPresenter {
   }
 
   init () {
+
     this.#boardTrip = [...this.#pointsModel.points];
     this.#destination = [...this.#pointsModel.description];
     this.#offers = [...this.#pointsModel.offers];
 
+    if(this.#boardTrip.length === 0) {
+      return render(new TripEmptyList(), this.#tripContainer);
 
+    }
+    this.#renderBoard();
+
+  }
+
+  #renderBoard () {
     render(new TripSort(), this.#tripContainer);
     render(this.#tripListComponent, this.#tripContainer);
 
@@ -55,7 +65,7 @@ export default class TripPresenter {
         replaceToTrip();
       },
       onClick: () => {
-        replaceToTrip()
+        replaceToTrip();
       }});
 
     function replaceToEdit () {

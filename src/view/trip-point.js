@@ -1,5 +1,5 @@
-import { diffTime, humanizeTaskDueDate } from '../utils.js';
 import AbstractView from '../framework/view/abstract-view.js';
+import { humanizeTaskDueDate, diffTime } from '../utils/dateUtils.js';
 
 
 const findDescription = (destination, dest) => {
@@ -28,13 +28,15 @@ const isFavoriteTrip = (isFavorite) => isFavorite === true ? '--active' : '';
 function createTripPoint (trip, offers, dest) {
 
   const {basePrice, type, offers: offersID, destination, isFavorite, dateFrom, dateTo} = trip;
-  const dateFormat = 'H:m';
-  const dateStart = humanizeTaskDueDate(dateFrom, dateFormat);
-  const dateEnd = humanizeTaskDueDate(dateTo, dateFormat);
+  const dateFormatTime = 'H:m';
+  const dateFormatDay = 'MMM DD';
+  const dateStart = humanizeTaskDueDate(dateFrom, dateFormatTime);
+  const dateEnd = humanizeTaskDueDate(dateTo, dateFormatTime);
+  const dateDayStart = humanizeTaskDueDate(dateFrom, dateFormatDay);
 
   return `<li class="trip-events__item">
     <div class="event">
-      <time class="event__date" datetime="2019-03-18">MAR 18</time>
+      <time class="event__date" datetime="${dateFrom}">${dateDayStart}</time>
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>
