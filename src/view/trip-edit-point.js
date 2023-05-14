@@ -1,6 +1,6 @@
-import { humanizeTaskDueDate } from '../utils.js';
 import { findDescription } from '../view/trip-point.js';
 import AbstractView from '../framework/view/abstract-view.js';
+import { humanizeTaskDueDate } from '../utils/dateUtils.js';
 
 const createAvaibleOffers = (offers, offersID, type) => {
   const offerByType = offers.find((offer) => offer.type === type).offers;
@@ -124,7 +124,7 @@ export default class TripEditPoint extends AbstractView {
   #offer = null;
   #destination = null;
   #handleSubmit = null;
-  #handleClick = null
+  #handleClick = null;
 
   constructor ({trip, offers, destination, onSubmit, onClick}) {
     super();
@@ -132,9 +132,9 @@ export default class TripEditPoint extends AbstractView {
     this.#offer = offers;
     this.#destination = destination;
     this.#handleSubmit = onSubmit;
-    this.#handleClick = onClick
+    this.#handleClick = onClick;
     this.element.querySelector('.event').addEventListener('submit', this.#submitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler)
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
   }
 
   get template() {
@@ -147,7 +147,7 @@ export default class TripEditPoint extends AbstractView {
   };
 
   #clickHandler = (evt) => {
-    evt.preventDefault()
-    this.#handleClick()
-  }
+    evt.preventDefault();
+    this.#handleClick();
+  };
 }
