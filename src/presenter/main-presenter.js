@@ -13,10 +13,10 @@ export default class MainPresenter {
   #boardTrip = null;
   #destination = null;
   #offers = null;
-  #sortComponent = new TripSort()
-  #emptyList = new TripEmptyList()
-  #tripPresenters = new Map()
-  
+  #sortComponent = new TripSort();
+  #emptyList = new TripEmptyList();
+  #tripPresenters = new Map();
+
 
   constructor ({tripContainer, pointsModel}) {
     this.#tripContainer = tripContainer;
@@ -34,31 +34,32 @@ export default class MainPresenter {
   #renderBoard () {
     render(this.#tripListComponent, this.#tripContainer);
     if (this.#boardTrip.length === 0) {
-      this.#renderNoTrip()
+      this.#renderNoTrip();
     } else {
       for (let i = 0; i < this.#boardTrip.length; i++) {
         this.#renderTripList(this.#boardTrip[i], this.#offers, this.#destination);
-        this.#renderSort()
+        this.#renderSort();
       }
     }
   }
-  
+
   #renderNoTrip () {
     if(this.#boardTrip.length === 0) {
       return render(this.#emptyList, this.#tripContainer, RenderPosition.AFTERBEGIN);
 
     }
   }
+
   #renderTripList (trip, offers, destination) {
     const tripPresenter = new TripPresenter({
       tripListComponent: this.#tripListComponent.element,
       onDataChange: this.#handleTripChange,
       onModeChange: this.#handleModeChange
-     })
+    });
 
-    tripPresenter.init(trip, offers, destination)
-    this.#tripPresenters.set(trip.id, tripPresenter)
-    
+    tripPresenter.init(trip, offers, destination);
+    this.#tripPresenters.set(trip.id, tripPresenter);
+
   }
 
   #renderSort () {
@@ -66,14 +67,16 @@ export default class MainPresenter {
   }
 
   #clearTripList = () => {
-    this.#tripPresenters.forEach((presenter) => presenter.destroy())
-    this.#tripPresenters.clear()
-  }
+    this.#tripPresenters.forEach((presenter) => presenter.destroy());
+    this.#tripPresenters.clear();
+  };
+
   #handleModeChange = () => {
-    this.#tripPresenters.forEach((presenter) => presenter.resetView())
-  }
+    this.#tripPresenters.forEach((presenter) => presenter.resetView());
+  };
+
   #handleTripChange = (updateTrip) => {
-    this.#boardTrip = updateItem(this.#boardTrip, updateTrip)
-    this.#tripPresenters.get(updateTrip.id).init(updateTrip, this.#offers, this.#destination)
-  }
+    this.#boardTrip = updateItem(this.#boardTrip, updateTrip);
+    this.#tripPresenters.get(updateTrip.id).init(updateTrip, this.#offers, this.#destination);
+  };
 }

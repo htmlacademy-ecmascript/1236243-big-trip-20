@@ -3,107 +3,112 @@ import TripPoint from '../view/trip-point.js';
 import { render, replace, remove } from '../framework/render.js';
 
 const Mode = {
-    DEFAULT: 'DEFAULT',
-    EDITTING: 'EDITTING'
-}
+  DEFAULT: 'DEFAULT',
+  EDITTING: 'EDITTING'
+};
 
 export default class TripPresenter {
-    #tripListComponent = null
-    #handleDataChange = null
-    #handleModeChange = null
+  #tripListComponent = null;
+  #handleDataChange = null;
+  #handleModeChange = null;
 
-    #tripComponent = null
-    #tripEditComponent = null
+  #tripComponent = null;
+  #tripEditComponent = null;
 
-    #trip = null
-    #offers= null
-    #destination = null
-    #mode = Mode.DEFAULT
+  #trip = null;
+  #offers = null;
+  #destination = null;
+  #mode = Mode.DEFAULT;
 
-    constructor ({tripListComponent, onDataChange, onModeChange}) {
-        this.#tripListComponent = tripListComponent
-        this.#handleDataChange = onDataChange
-        this.#handleModeChange = onModeChange
-    }
-    
-    init(trip, offers, destination) {
-        this.#trip = trip
-        this.#offers = offers
-        this.#destination = destination
+  constructor ({tripListComponent, onDataChange, onModeChange}) {
+    this.#tripListComponent = tripListComponent;
+    this.#handleDataChange = onDataChange;
+    this.#handleModeChange = onModeChange;
+  }
 
-        const prevTripComponent = this.#tripComponent
-        const prevEditTripComponent = this.#tripEditComponent
-        
-        this.#tripComponent = new TripPoint({
-            trip: this.#trip,
-            offers: this.#offers,
-            destination: this.#destination,
-            onClick: this.#handleEditClick,
-            onFavoriteClick: this.#handleFavoritClick
-        })
+  init(trip, offers, destination) {
+    this.#trip = trip;
+    this.#offers = offers;
+    this.#destination = destination;
 
-        this.#tripEditComponent = new TripEditPoint({
-            trip: this.#trip,
-            offers: this.#offers,
-            destination: this.#destination,
-            onSubmit: this.#handleFormSubmit,
-            onClick: this.#handleFormSubmit,
-            onFavoriteClick: this.#handleFavoritClick
-        })
+    const prevTripComponent = this.#tripComponent;
+    const prevEditTripComponent = this.#tripEditComponent;
 
-        if (prevTripComponent === null || prevEditTripComponent === null) {
-            render(this.#tripComponent, this.#tripListComponent)
-            return
-        }
+    this.#tripComponent = new TripPoint({
+      trip: this.#trip,
+      offers: this.#offers,
+      destination: this.#destination,
+      onClick: this.#handleEditClick,
+      onFavoriteClick: this.#handleFavoritClick
+    });
 
-        if (this.#mode === Mode.DEFAULT) {
-            replace(this.#tripComponent, prevTripComponent)
-        }
+    this.#tripEditComponent = new TripEditPoint({
+      trip: this.#trip,
+      offers: this.#offers,
+      destination: this.#destination,
+      onSubmit: this.#handleFormSubmit,
+      onClick: this.#handleFormSubmit,
+      onFavoriteClick: this.#handleFavoritClick
+    });
 
-        if (this.#mode === Mode.EDITTING) {
-            replace(this.#tripEditComponent, prevEditTripComponent)
-        }
-
-        
-        remove(prevTripComponent)
-        remove(prevEditTripComponent)
+    if (prevTripComponent === null || prevEditTripComponent === null) {
+      render(this.#tripComponent, this.#tripListComponent);
+      return;
     }
 
-    destroy() {
-        remove(this.#tripComponent)
-        remove(this.#tripEditComponent)
+    if (this.#mode === Mode.DEFAULT) {
+      replace(this.#tripComponent, prevTripComponent);
     }
 
-    #replaceToEdit() {
-        replace(this.#tripEditComponent, this.#tripComponent);
-        document.addEventListener('keydown', this.#escKeyHandler);
-        this.#handleModeChange()
-        this.#mode = Mode.EDITTING
-      }
-    #replaceToTrip() {
-        replace(this.#tripComponent, this.#tripEditComponent);
-        document.removeEventListener('keydown', this.#escKeyHandler);
-        this.#mode = Mode.DEFAULT
-      }
-    #escKeyHandler = (evt) => {
-        if (evt.key === 'Escape') {
-          evt.preventDefault();
-          this.#replaceToTrip();
-        }
-      };
+    if (this.#mode === Mode.EDITTING) {
+      replace(this.#tripEditComponent, prevEditTripComponent);
+    }
 
-    resetView = () => {
-        if(this.#mode !== Mode.DEFAULT) {
-            this.#replaceToTrip()
-        }
+
+    remove(prevTripComponent);
+    remove(prevEditTripComponent);
+  }
+
+  destroy() {
+    remove(this.#tripComponent);
+    remove(this.#tripEditComponent);
+  }
+
+  #replaceToEdit() {
+    replace(this.#tripEditComponent, this.#tripComponent);
+    document.addEventListener('keydown', this.#escKeyHandler);
+    this.#handleModeChange();
+    this.#mode = Mode.EDITTING;
+  }
+
+  #replaceToTrip() {
+    replace(this.#tripComponent, this.#tripEditComponent);
+    document.removeEventListener('keydown', this.#escKeyHandler);
+    this.#mode = Mode.DEFAULT;
+  }
+
+  #escKeyHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.#replaceToTrip();
     }
-    #handleEditClick = () => {
-        this.#replaceToEdit()
+  };
+
+  resetView = () => {
+    if(this.#mode !== Mode.DEFAULT) {
+      this.#replaceToTrip();
     }
-    #handleFormSubmit = () => {
-        this.#replaceToTrip()
-    }
-    #handleFavoritClick = () => {
-        this.#handleDataChange({...this.#trip, isFavorite: !this.#trip.isFavorite})
-    }
+  };
+
+  #handleEditClick = () => {
+    this.#replaceToEdit();
+  };
+
+  #handleFormSubmit = () => {
+    this.#replaceToTrip();
+  };
+
+  #handleFavoritClick = () => {
+    this.#handleDataChange({...this.#trip, isFavorite: !this.#trip.isFavorite});
+  };
 }

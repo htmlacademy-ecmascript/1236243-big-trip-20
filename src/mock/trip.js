@@ -49,8 +49,8 @@ function getRandomPoint() {
   return {
     id: nanoid(),
     ...getRandomArrayElement(points)
-  }
-  
+  };
+
 }
 
 
