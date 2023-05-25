@@ -9,5 +9,4 @@ const getRandomArrayElement = (array) => array[getRandomInteger(0, array.length 
 
 const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
 
-
 export { getRandomInteger, getRandomArrayElement, updateItem };
