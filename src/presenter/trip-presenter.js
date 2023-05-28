@@ -90,12 +90,14 @@ export default class TripPresenter {
   #escKeyHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
+      this.#tripEditComponent.reset(this.#trip);
       this.#replaceToTrip();
     }
   };
 
   resetView = () => {
     if(this.#mode !== Mode.DEFAULT) {
+      this.#tripEditComponent.reset(this.#trip);
       this.#replaceToTrip();
     }
   };

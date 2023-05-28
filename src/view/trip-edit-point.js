@@ -1,6 +1,7 @@
 import { findDescription } from '../view/trip-point.js';
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizeTaskDueDate } from '../utils/dateUtils.js';
+
 
 const createAvaibleOffers = (offers, offersID, type) => {
   const offerByType = offers.find((offer) => offer.type === type).offers;
@@ -9,7 +10,7 @@ const createAvaibleOffers = (offers, offersID, type) => {
   for (let i = 0; i < offerByType.length; i++) {
     const isChecked = offersID.includes(offerByType[i].id) ? 'checked' : '';
     arrayOffers.push(`<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="${offerByType[i].id}" ${isChecked}> 
+        <input class="event__offer-checkbox  visually-hidden" id="${offerByType[i].id}" type="checkbox" name="${offerByType[i].type}" ${isChecked}> 
         <label class="event__offer-label" for="${offerByType[i].id}">
           <span class="event__offer-title">${offerByType[i].title}</span>
           &plus;&euro;&nbsp;
@@ -21,9 +22,9 @@ const createAvaibleOffers = (offers, offersID, type) => {
   return arrayOffers.join('');
 };
 const createTypesList = (offers, type) => {
-  const typesList = offers.map((offer) => `<div class="event__type-${offer.type}">
-    <input id="event-type-${offer.type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${offer.type}" ${offer.type === type ? 'checked' : ''}>
-    <label class="event__type-label  event__type-label--${offer.type}" for="event-type-${offer.type}-1">${offer.type}</label>
+  const typesList = offers.map((offer, index) => `<div class="event__type-${offer.type}">
+    <input id="event-type-${offer.type}-${index + 1}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${offer.type}" ${offer.type === type ? 'checked' : ''} ">
+    <label class="event__type-label  event__type-label--${offer.type}" for="event-type-${offer.type}-${index + 1}" data-offer-type="${offer.type}" >${offer.type}</label>
     </div>`).join('');
   return typesList;
 };
@@ -38,9 +39,10 @@ const createFotoElement = (destination, dest) => {
   return fotoTemplate;
 };
 
-function createTripEditPoint (trip, offers, dest) {
+function createTripEditPoint (trip, offersAll, dest) {
 
-  const {type, offers: offersID, destination, dateFrom, dateTo, basePrice} = trip;
+  const {type, offers: offersId, destination, dateFrom, dateTo, basePrice} = trip;
+
   const dateFormat = 'DD/MM/YY HH:MM';
   const dateStart = humanizeTaskDueDate(dateFrom, dateFormat);
   const dateEnd = humanizeTaskDueDate(dateTo, dateFormat);
@@ -58,7 +60,7 @@ function createTripEditPoint (trip, offers, dest) {
           <div class="event__type-list">
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Event type</legend>
-                ${createTypesList(offers, type)}
+                ${createTypesList(offersAll, type)}
             </fieldset>
           </div>
         </div>
@@ -100,7 +102,7 @@ function createTripEditPoint (trip, offers, dest) {
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
           <div class="event__available-offers">
-            ${createAvaibleOffers(offers, offersID, type)}
+            ${createAvaibleOffers(offersAll, offersId, type)}
           </div>
         </section>
 
@@ -119,8 +121,8 @@ function createTripEditPoint (trip, offers, dest) {
   </li>`;
 }
 
-export default class TripEditPoint extends AbstractView {
-  #trip = null;
+export default class TripEditPoint extends AbstractStatefulView {
+
   #offer = null;
   #destination = null;
   #handleSubmit = null;
@@ -128,26 +130,82 @@ export default class TripEditPoint extends AbstractView {
 
   constructor ({trip, offers, destination, onSubmit, onClick}) {
     super();
-    this.#trip = trip;
+    this._setState(TripEditPoint.parseTripToState(trip));
     this.#offer = offers;
     this.#destination = destination;
     this.#handleSubmit = onSubmit;
     this.#handleClick = onClick;
-    this.element.querySelector('.event').addEventListener('submit', this.#submitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+    this._restoreHandlers();
   }
 
   get template() {
-    return createTripEditPoint(this.#trip, this.#offer, this.#destination);
+    return createTripEditPoint(this._state, this.#offer, this.#destination);
   }
 
-  #submitHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleSubmit();
+  #submitHandler = () => {
+
+    this.#handleSubmit(TripEditPoint.parseStateToTrip(this._state));
   };
 
   #clickHandler = (evt) => {
     evt.preventDefault();
     this.#handleClick();
   };
+
+  #inputHandlerDestination = (evt) => {
+    evt.preventDefault();
+    const selectedDestination = this.#destination.find((tripDest) => tripDest.name === evt.target.value);
+    this.updateElement({
+      destination: selectedDestination.id
+    });
+  };
+
+  #clickHandlerType = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+
+      type: evt.target.value,
+      offers: []
+
+    });
+  };
+
+  #clickHandlerOffer = (evt) => {
+    evt.preventDefault();
+    const checkedBoxed = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'));
+    this._setState({
+      offers: checkedBoxed.map((el) => el.id)
+    });
+  };
+
+  #changeHandlerPrice = (evt) => {
+    evt.preventDefault();
+    this._setState({
+      basePrice: evt.target.value
+    });
+
+  };
+
+  static parseTripToState(trip) {
+    return {
+      ...trip
+    };
+  }
+
+  static parseStateToTrip (state) {
+    return state;
+  }
+
+  reset = (trip) => {
+    this.updateElement(TripEditPoint.parseTripToState(trip));
+  };
+
+  _restoreHandlers () {
+    this.element.querySelector('.event').addEventListener('submit', this.#submitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#clickHandlerType);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#inputHandlerDestination);
+    this.element.querySelector('.event__available-offers').addEventListener('change', this.#clickHandlerOffer);
+    this.element.querySelector('.event__input--price').addEventListener('input', this.#changeHandlerPrice);
+  }
 }
