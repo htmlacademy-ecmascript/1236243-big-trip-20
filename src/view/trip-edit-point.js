@@ -1,7 +1,9 @@
 import { findDescription } from '../view/trip-point.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizeTaskDueDate } from '../utils/dateUtils.js';
+import flatpickr from 'flatpickr';
 
+import 'flatpickr/dist/flatpickr.min.css';
 
 const createAvaibleOffers = (offers, offersID, type) => {
   const offerByType = offers.find((offer) => offer.type === type).offers;
@@ -127,6 +129,8 @@ export default class TripEditPoint extends AbstractStatefulView {
   #destination = null;
   #handleSubmit = null;
   #handleClick = null;
+  #datapickerStart = null;
+  #datapickerEnd = null;
 
   constructor ({trip, offers, destination, onSubmit, onClick}) {
     super();
@@ -142,8 +146,20 @@ export default class TripEditPoint extends AbstractStatefulView {
     return createTripEditPoint(this._state, this.#offer, this.#destination);
   }
 
-  #submitHandler = () => {
+  removeElement() {
+    super.removeElement();
 
+    if(this.#datapickerStart) {
+      this.#datapickerStart.destroy();
+      this.#datapickerStart = null;
+    }
+    if(this.#datapickerEnd) {
+      this.#datapickerEnd.destroy();
+      this.#datapickerEnd = null;
+    }
+  }
+
+  #submitHandler = () => {
     this.#handleSubmit(TripEditPoint.parseStateToTrip(this._state));
   };
 
@@ -183,7 +199,51 @@ export default class TripEditPoint extends AbstractStatefulView {
     this._setState({
       basePrice: evt.target.value
     });
+  };
 
+  #setDatepicker = () => {
+    const [dateFrom, dateTo] = this.element.querySelectorAll('.event__input--time');
+    this.#datapickerStart = flatpickr(
+      dateFrom,
+      {
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateFrom,
+        onChange: this.#dateFromChangeHandler,
+        enableTime: true,
+        maxDate: this._state.dateTo,
+        'time_24hr': true,
+        locale: {
+          firstDayOfWeek:1
+        }
+      }
+    );
+    this.#datapickerEnd = flatpickr(
+      dateTo,
+      {
+        dateFormat: 'd/m/y H:i',
+        defaultDate: this._state.dateTo,
+        onChange: this.#dateToChangeHandler,
+        enableTime: true,
+        minDate: this._state.dateFrom,
+        'time_24hr': true,
+        locale: {
+          firstDayOfWeek:1
+        }
+      }
+    );
+  };
+
+
+  #dateFromChangeHandler = ([userDate]) => {
+    this.updateElement ({
+      dateFrom: userDate
+    });
+  };
+
+  #dateToChangeHandler = ([userDate]) => {
+    this.updateElement ({
+      dateTo: userDate
+    });
   };
 
   static parseTripToState(trip) {
@@ -207,5 +267,7 @@ export default class TripEditPoint extends AbstractStatefulView {
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#inputHandlerDestination);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#clickHandlerOffer);
     this.element.querySelector('.event__input--price').addEventListener('input', this.#changeHandlerPrice);
+
+    this.#setDatepicker();
   }
 }
