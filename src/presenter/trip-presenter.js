@@ -48,7 +48,7 @@ export default class TripPresenter {
       destination: this.#destination,
       onSubmit: this.#handleFormSubmit,
       onClick: this.#handleHideEditForm,
-      onFavoriteClick: this.#handleFavoritClick
+      onCanselClick: this.#handleCanselClick
     });
 
     if (prevTripComponent === null || prevEditTripComponent === null) {
@@ -82,6 +82,7 @@ export default class TripPresenter {
   }
 
   #replaceToTrip() {
+    this.#tripEditComponent.reset(this.#trip);
     replace(this.#tripComponent, this.#tripEditComponent);
     document.removeEventListener('keydown', this.#escKeyHandler);
     this.#mode = Mode.DEFAULT;
@@ -90,17 +91,18 @@ export default class TripPresenter {
   #escKeyHandler = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#tripEditComponent.reset(this.#trip);
       this.#replaceToTrip();
     }
   };
 
   resetView = () => {
     if(this.#mode !== Mode.DEFAULT) {
-      this.#tripEditComponent.reset(this.#trip);
       this.#replaceToTrip();
     }
   };
+  #handleCanselClick = () => {
+    this.resetView()
+  }
 
   #handleEditClick = () => {
     this.#replaceToEdit();

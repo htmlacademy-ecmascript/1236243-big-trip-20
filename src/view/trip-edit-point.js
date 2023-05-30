@@ -91,7 +91,7 @@ function createTripEditPoint (trip, offersAll, dest) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -132,15 +132,18 @@ export default class TripEditPoint extends AbstractStatefulView {
   #handleClick = null;
   #datapickerStart = null;
   #datapickerEnd = null;
+  #handleCansel = null
 
-  constructor ({trip, offers, destination, onSubmit, onClick}) {
+  constructor ({trip, offers, destination, onSubmit, onClick, onCanselClick}) {
     super();
-    this._setState(TripEditPoint.parseTripToState({trip}));
+    this._setState(this.#parseTripToState({trip}));
     this.#offer = offers;
     this.#destination = destination;
     this.#handleSubmit = onSubmit;
     this.#handleClick = onClick;
+    this.#handleCansel = onCanselClick
     this._restoreHandlers();
+
   }
 
   get template() {
@@ -162,7 +165,7 @@ export default class TripEditPoint extends AbstractStatefulView {
 
   #submitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleSubmit(TripEditPoint.parseStateToTrip(this._state));
+    this.#handleSubmit(this.#parseStateToTrip(this._state));
   };
 
   #clickHandler = (evt) => {
@@ -173,6 +176,12 @@ export default class TripEditPoint extends AbstractStatefulView {
   #inputHandlerDestination = (evt) => {
     evt.preventDefault();
     const selectedDestination = this.#destination.find((tripDest) => tripDest.name === evt.target.value);
+    if (selectedDestination === undefined) {
+      this.updateElement({
+        destination: this._state.destination
+      });
+      return
+    }
     this.updateElement({
       destination: selectedDestination.id
     });
@@ -193,6 +202,11 @@ export default class TripEditPoint extends AbstractStatefulView {
       offers: checkedBoxed.map((el) => el.id)
     });
   };
+
+  #clickHandlerCansel = (evt) => {
+    evt.preventDefault()
+    this.#handleCansel()
+  } 
 
   #changeHandlerPrice = (evt) => {
     evt.preventDefault();
@@ -246,17 +260,16 @@ export default class TripEditPoint extends AbstractStatefulView {
     });
   };
 
-  static parseTripToState = ({trip}) => ({
-    ...trip
-  });
+  #parseTripToState = ({trip}) => ({...trip});
 
-  static parseStateToTrip = (state) => {
+  #parseStateToTrip = (state) => {
     const trip = {...state};
     return trip;
   };
 
   reset = (trip) => {
-    this.updateElement(TripEditPoint.parseTripToState(trip));
+    this.updateElement(this.#parseTripToState({trip}));
+
   };
 
   _restoreHandlers () {
@@ -266,6 +279,7 @@ export default class TripEditPoint extends AbstractStatefulView {
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#inputHandlerDestination);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#clickHandlerOffer);
     this.element.querySelector('.event__input--price').addEventListener('input', this.#changeHandlerPrice);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickHandlerCansel);
     this.#setDatepicker();
   }
 }
