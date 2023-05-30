@@ -28,7 +28,7 @@ const isFavoriteTrip = (isFavorite) => isFavorite === true ? '--active' : '';
 function createTripPoint (trip, offers, dest) {
 
   const {basePrice, type, offers: offersID, destination, isFavorite, dateFrom, dateTo} = trip;
-  const dateFormatTime = 'H:m';
+  const dateFormatTime = 'HH:mm';
   const dateFormatDay = 'MMM DD';
   const dateStart = humanizeTaskDueDate(dateFrom, dateFormatTime);
   const dateEnd = humanizeTaskDueDate(dateTo, dateFormatTime);
