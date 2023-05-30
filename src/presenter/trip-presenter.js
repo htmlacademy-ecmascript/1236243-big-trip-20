@@ -47,7 +47,7 @@ export default class TripPresenter {
       offers: this.#offers,
       destination: this.#destination,
       onSubmit: this.#handleFormSubmit,
-      onClick: this.#handleFormSubmit,
+      onClick: this.#handleHideEditForm,
       onFavoriteClick: this.#handleFavoritClick
     });
 
@@ -106,7 +106,12 @@ export default class TripPresenter {
     this.#replaceToEdit();
   };
 
-  #handleFormSubmit = () => {
+  #handleFormSubmit = (trip) => {
+    this.#replaceToTrip();
+    this.#handleDataChange(trip);
+  };
+
+  #handleHideEditForm = () => {
     this.#replaceToTrip();
   };
 

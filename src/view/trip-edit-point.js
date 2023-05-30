@@ -4,6 +4,7 @@ import { humanizeTaskDueDate } from '../utils/dateUtils.js';
 import flatpickr from 'flatpickr';
 
 import 'flatpickr/dist/flatpickr.min.css';
+import dayjs from 'dayjs';
 
 const createAvaibleOffers = (offers, offersID, type) => {
   const offerByType = offers.find((offer) => offer.type === type).offers;
@@ -134,7 +135,7 @@ export default class TripEditPoint extends AbstractStatefulView {
 
   constructor ({trip, offers, destination, onSubmit, onClick}) {
     super();
-    this._setState(TripEditPoint.parseTripToState(trip));
+    this._setState(TripEditPoint.parseTripToState({trip}));
     this.#offer = offers;
     this.#destination = destination;
     this.#handleSubmit = onSubmit;
@@ -159,7 +160,8 @@ export default class TripEditPoint extends AbstractStatefulView {
     }
   }
 
-  #submitHandler = () => {
+  #submitHandler = (evt) => {
+    evt.preventDefault();
     this.#handleSubmit(TripEditPoint.parseStateToTrip(this._state));
   };
 
@@ -179,10 +181,8 @@ export default class TripEditPoint extends AbstractStatefulView {
   #clickHandlerType = (evt) => {
     evt.preventDefault();
     this.updateElement({
-
       type: evt.target.value,
       offers: []
-
     });
   };
 
@@ -236,25 +236,24 @@ export default class TripEditPoint extends AbstractStatefulView {
 
   #dateFromChangeHandler = ([userDate]) => {
     this.updateElement ({
-      dateFrom: userDate
+      dateFrom: dayjs(userDate).toJSON()
     });
   };
 
   #dateToChangeHandler = ([userDate]) => {
     this.updateElement ({
-      dateTo: userDate
+      dateTo: dayjs(userDate).toJSON()
     });
   };
 
-  static parseTripToState(trip) {
-    return {
-      ...trip
-    };
-  }
+  static parseTripToState = ({trip}) => ({
+    ...trip
+  });
 
-  static parseStateToTrip (state) {
-    return state;
-  }
+  static parseStateToTrip = (state) => {
+    const trip = {...state};
+    return trip;
+  };
 
   reset = (trip) => {
     this.updateElement(TripEditPoint.parseTripToState(trip));
@@ -267,7 +266,6 @@ export default class TripEditPoint extends AbstractStatefulView {
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#inputHandlerDestination);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#clickHandlerOffer);
     this.element.querySelector('.event__input--price').addEventListener('input', this.#changeHandlerPrice);
-
     this.#setDatepicker();
   }
 }

@@ -1,6 +1,6 @@
 const CITY_DESCRIPTION = [
   {
-    id: 1,
+    id: '1',
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     name: 'London',
     pictures: [
@@ -22,7 +22,7 @@ const CITY_DESCRIPTION = [
       }]
   },
   {
-    id: 2,
+    id: '2',
     description: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     name: 'Berlin',
     pictures: [
@@ -40,7 +40,7 @@ const CITY_DESCRIPTION = [
       }]
   },
   {
-    id: 3,
+    id: '3',
     description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
     name: 'Amsterdam',
     pictures: [
