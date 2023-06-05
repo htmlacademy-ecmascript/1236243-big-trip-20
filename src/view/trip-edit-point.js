@@ -95,7 +95,7 @@ function createTripEditPoint (trip, offersAll, dest) {
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__reset-btn" type="reset">Delete</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
@@ -132,16 +132,16 @@ export default class TripEditPoint extends AbstractStatefulView {
   #handleClick = null;
   #datapickerStart = null;
   #datapickerEnd = null;
-  #handleCansel = null
+  #handleDelete = null;
 
-  constructor ({trip, offers, destination, onSubmit, onClick, onCanselClick}) {
+  constructor ({trip, offers, destination, onSubmit, onClick, onDeleteClick}) {
     super();
     this._setState(this.#parseTripToState({trip}));
     this.#offer = offers;
     this.#destination = destination;
     this.#handleSubmit = onSubmit;
     this.#handleClick = onClick;
-    this.#handleCansel = onCanselClick
+    this.#handleDelete = onDeleteClick;
     this._restoreHandlers();
 
   }
@@ -180,7 +180,7 @@ export default class TripEditPoint extends AbstractStatefulView {
       this.updateElement({
         destination: this._state.destination
       });
-      return
+      return;
     }
     this.updateElement({
       destination: selectedDestination.id
@@ -203,10 +203,10 @@ export default class TripEditPoint extends AbstractStatefulView {
     });
   };
 
-  #clickHandlerCansel = (evt) => {
-    evt.preventDefault()
-    this.#handleCansel()
-  } 
+  #clickHandlerDelete = (evt) => {
+    evt.preventDefault();
+    this.#handleDelete(this.#parseStateToTrip(this._state));
+  };
 
   #changeHandlerPrice = (evt) => {
     evt.preventDefault();
@@ -279,7 +279,7 @@ export default class TripEditPoint extends AbstractStatefulView {
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#inputHandlerDestination);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#clickHandlerOffer);
     this.element.querySelector('.event__input--price').addEventListener('input', this.#changeHandlerPrice);
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickHandlerCansel);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickHandlerDelete);
     this.#setDatepicker();
   }
 }
