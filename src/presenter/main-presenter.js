@@ -6,6 +6,9 @@ import TripPresenter from './trip-presenter.js';
 import { sortByPrice, sortByTime } from '../utils/sort.js';
 import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 import { filter } from '../utils/filter.js';
+import TripInfo from '../view/trip-info.js';
+import NewButton from '../view/trip-new-button.js';
+import NewTripPresenter from './new-trip-presenter.js';
 
 
 export default class MainPresenter {
@@ -18,13 +21,23 @@ export default class MainPresenter {
   #sortComponent = null;
   #emptyListComponent = null;
   #tripPresenters = new Map();
+  #newTripPresenter = null
   #currentSortType = SortType.DAY;
   #filterType = FilterType.EVERYTHING;
+  #tripInfoContainer = null
+  #tripInfo = null
 
-  constructor ({tripContainer, pointsModel, filterModel}) {
+  constructor ({tripContainer, pointsModel, filterModel, tripInfoContainer, onNewTripDestroy}) {
     this.#tripContainer = tripContainer;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
+    this.#tripInfoContainer = tripInfoContainer
+
+    this.#newTripPresenter = new NewTripPresenter({
+      tripListComponent: this.#tripListComponent.element,
+      onDataChange: this.#handleViewAction(),
+      onDestroy: onNewTripDestroy
+    })
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -47,7 +60,9 @@ export default class MainPresenter {
   init () {
     this.#destination = [...this.#pointsModel.description];
     this.#offers = [...this.#pointsModel.offers];
+    this.#renderTripInfo()
     this.#renderBoard();
+    this.#renderSort();
   }
 
   #renderBoard () {
@@ -57,15 +72,19 @@ export default class MainPresenter {
     const pointsCount = points.length;
 
     if (pointsCount === 0) {
+      remove(this.#sortComponent);
       this.#renderNoTrip();
       return;
     }
 
-    this.#renderSort();
-
     for (let i = 0; i < pointsCount; i++) {
       this.#renderTripList(points[i], this.#offers, this.#destination);
     }
+  }
+
+  #renderTripInfo () {
+    this.#tripInfo = new TripInfo()
+    render (this.#tripInfo, this.#tripInfoContainer, RenderPosition.AFTERBEGIN);
   }
 
   #renderNoTrip () {
@@ -104,10 +123,7 @@ export default class MainPresenter {
   #clearBoard = ({resetSortType = false} = {}) => {
     this.#tripPresenters.forEach((presenter) => presenter.destroy());
     this.#tripPresenters.clear();
-
-    remove(this.#sortComponent);
     remove(this.#emptyListComponent);
-
     if(resetSortType) {
       this.#currentSortType = SortType.DAY;
     }
@@ -148,4 +164,10 @@ export default class MainPresenter {
         break;
     }
   };
+
+  createNewTrip = () => {
+    this.#currentSortType = SortType.DAY
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING)
+    this.#newTripPresenter.init(null, this.#offers, this.#destination)
+  } 
 }
