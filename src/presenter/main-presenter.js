@@ -9,6 +9,8 @@ import { filter } from '../utils/filter.js';
 import TripInfo from '../view/trip-info.js';
 import NewButton from '../view/trip-new-button.js';
 import NewTripPresenter from './new-trip-presenter.js';
+import AddPoint from '../view/trip-add-point.js';
+import TripEditPoint from '../view/trip-edit-point.js';
 
 
 export default class MainPresenter {
@@ -21,13 +23,14 @@ export default class MainPresenter {
   #sortComponent = null;
   #emptyListComponent = null;
   #tripPresenters = new Map();
-  #newTripPresenter = null
   #currentSortType = SortType.DAY;
   #filterType = FilterType.EVERYTHING;
   #tripInfoContainer = null
   #tripInfo = null
+  #newButton = null
+  #newTripPresenter = null
 
-  constructor ({tripContainer, pointsModel, filterModel, tripInfoContainer, onNewTripDestroy}) {
+  constructor ({tripContainer, pointsModel, filterModel, tripInfoContainer}) {
     this.#tripContainer = tripContainer;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
@@ -35,9 +38,10 @@ export default class MainPresenter {
 
     this.#newTripPresenter = new NewTripPresenter({
       tripListComponent: this.#tripListComponent.element,
-      onDataChange: this.#handleViewAction(),
-      onDestroy: onNewTripDestroy
+      onSubmit: this.#handleViewAction,
+      onDeleteClick: this.#handleDeleteClick
     })
+    
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -63,6 +67,7 @@ export default class MainPresenter {
     this.#renderTripInfo()
     this.#renderBoard();
     this.#renderSort();
+    this.#renderNewButton()
   }
 
   #renderBoard () {
@@ -76,6 +81,11 @@ export default class MainPresenter {
       this.#renderNoTrip();
       return;
     }
+    this.#newTripPresenter = new NewTripPresenter({
+      tripListComponent: this.#tripListComponent.element,
+      onSubmit: this.#handleViewAction,
+      onDeleteClick: this.#handleDeleteClick
+    })
 
     for (let i = 0; i < pointsCount; i++) {
       this.#renderTripList(points[i], this.#offers, this.#destination);
@@ -109,6 +119,18 @@ export default class MainPresenter {
       onSortTypeChange: this.#handleSortTypeChange
     });
     render(this.#sortComponent, this.#tripContainer, RenderPosition.AFTERBEGIN);
+  }
+
+  #renderNewButton () {
+    this.#newButton = new NewButton({
+      onClick: this.#handleNewTripButton
+    })
+    render (this.#newButton, this.#tripInfoContainer, RenderPosition.BEFOREEND)
+  }
+
+  #handleNewTripButton = () => {
+    this.#createNewTrip()
+    this.#newButton.element.disabled = true
   }
 
   #handleSortTypeChange = (sortType) => {
@@ -164,10 +186,14 @@ export default class MainPresenter {
         break;
     }
   };
+  #handleDeleteClick = () => {
+    console.log('Delete');
+  }
 
-  createNewTrip = () => {
+  #createNewTrip = () => {
     this.#currentSortType = SortType.DAY
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING)
     this.#newTripPresenter.init(null, this.#offers, this.#destination)
+    
   } 
 }

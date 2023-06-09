@@ -5,6 +5,7 @@ import flatpickr from 'flatpickr';
 
 import 'flatpickr/dist/flatpickr.min.css';
 import dayjs from 'dayjs';
+import { nanoid } from 'nanoid';
 
 const createAvaibleOffers = (offers, offersID, type) => {
   const offerByType = offers.find((offer) => offer.type === type).offers;
@@ -37,6 +38,9 @@ const createOptionCity = (dest) => {
 };
 
 const createFotoElement = (destination, dest) => {
+  if(destination === null) {
+    return ''
+  }
   const cityFotos = findDescription(destination, dest).pictures;
   const fotoTemplate = cityFotos.map((item) => `<img class="event__photo" src='${item.src}' alt='${item.description}'></img>`);
   return fotoTemplate;
@@ -111,7 +115,7 @@ function createTripEditPoint (trip, offersAll, dest) {
 
         <section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${findDescription(destination,dest).description}</p>
+          <p class="event__destination-description">${findDescription(destination, dest).description}</p>
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
@@ -136,6 +140,20 @@ export default class TripEditPoint extends AbstractStatefulView {
 
   constructor ({trip, offers, destination, onSubmit, onClick, onDeleteClick}) {
     super();
+
+    if(!trip) {
+      const dateNow = new Date()
+      trip = {
+        id: nanoid(),
+        dateStart: dateNow,
+        dateFrom: dateNow,
+        type: offers[0].type,
+        offers: [],
+        destination: null,
+        price: 0
+      }
+    }
+
     this._setState(this.#parseTripToState({trip}));
     this.#offer = offers;
     this.#destination = destination;

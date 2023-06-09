@@ -167,6 +167,10 @@ function createTemplateNewPoint () {
 
 export default class AddPoint extends AbstractView{
 
+  constructor() {
+    super()
+  }
+
   get template() {
     return createTemplateNewPoint();
   }

@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid"
 import { UpdateType, UserAction } from "../const"
-import { remove, render } from "../framework/render"
+import { RenderPosition, remove, render } from "../framework/render"
 import AddPoint from "../view/trip-add-point"
 import TripEditPoint from "../view/trip-edit-point"
 
@@ -10,33 +10,29 @@ export default class NewTripPresenter {
     #triplistComponent = null
     #handleDataChange = null
     #handleDestroy = null
-    #trip = null
-    #offers = null
     #destination = null
 
     #newTripComponent = null
 
-    constructor(tripListComponent, onDataChange, onDestroy) {
-        this.#triplistComponent = tripListComponent,
-        this.#handleDataChange = onDataChange,
-        this.#handleDestroy = onDestroy
+    constructor(tripListComp, onSubmit, onDeleteClick) {
+        this.#triplistComponent = tripListComp,
+        this.#handleDataChange = onSubmit,
+        this.#handleDestroy = onDeleteClick
     }
 
     init(trip, offers, destination) {
-        this.#trip = trip
-        this.#offers = offers
-        this.#destination = destination
-
         if(this.#newTripComponent !== null) {
             return
         }
-
         this.#newTripComponent = new TripEditPoint({
-            trip: this.#trip,
-            offers: this.#offers,
-            destination: this.#destination
+            trip,
+            offers,
+            destination, 
+            onSubmit: this.#handleFormSubmit,
+            onDeleteClick: this.#handleDeleteClick
+
         })
-        render(this.#newTripComponent, this.#triplistComponent)
+        render(this.#newTripComponent, this.#triplistComponent, RenderPosition.AFTERBEGIN)
         document.addEventListener('keydown', this.#escKeyDownHandler)
     }
 

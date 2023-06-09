@@ -15,8 +15,7 @@ const mainPresenter = new MainPresenter({
   tripContainer: tripEvents,
   pointsModel,
   filterModel,
-  tripInfoContainer: tripMain,
-  onNewTripDestroy: handleNewTripClose
+  tripInfoContainer: tripMain
 });
 
 const filterPresenter = new FilterPresenter({
@@ -24,21 +23,6 @@ const filterPresenter = new FilterPresenter({
   filterModel,
   pointsModel
 });
-
-const newTripButtonComponent = new NewButton({
-  onClick: handleNewTripButton
-})
-
-function handleNewTripButton() {
-  mainPresenter.createNewTrip()
-  newTripButtonComponent.element.disabled = true
-}
-
-function handleNewTripClose () {
-  newTripButtonComponent.element.disabled = false
-}
-
-render (newTripButtonComponent, tripMain, RenderPosition.BEFOREEND)
 
 filterPresenter.init();
 mainPresenter.init();
