@@ -4,9 +4,9 @@ import { humanizeTaskDueDate, diffTime } from '../utils/dateUtils.js';
 
 const findDescription = (destination, dest) => {
   if(destination === null) {
-    return ''
+    return '';
   }
-  
+
   const city = dest.find((el) => destination === el.id);
   return city;
 };

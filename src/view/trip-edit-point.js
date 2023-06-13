@@ -2,7 +2,6 @@ import { findDescription } from '../view/trip-point.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizeTaskDueDate } from '../utils/dateUtils.js';
 import flatpickr from 'flatpickr';
-
 import 'flatpickr/dist/flatpickr.min.css';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
@@ -39,14 +38,14 @@ const createOptionCity = (dest) => {
 
 const createFotoElement = (destination, dest) => {
   if(destination === null) {
-    return ''
+    return '';
   }
   const cityFotos = findDescription(destination, dest).pictures;
   const fotoTemplate = cityFotos.map((item) => `<img class="event__photo" src='${item.src}' alt='${item.description}'></img>`);
   return fotoTemplate;
 };
 
-function createTripEditPoint (trip, offersAll, dest) {
+function createTripEditPoint (trip, offersAll, dest, isNewTrip) {
 
   const {type, offers: offersId, destination, dateFrom, dateTo, basePrice} = trip;
 
@@ -76,9 +75,9 @@ function createTripEditPoint (trip, offersAll, dest) {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${findDescription(destination,dest).name}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination === null ? '' : findDescription(destination,dest).name}" list="destination-list-1">
           <datalist id="destination-list-1">
-            ${createOptionCity(dest)}
+            ${(destination === null ? '' : createOptionCity(dest))}
           </datalist>
         </div>
 
@@ -95,11 +94,11 @@ function createTripEditPoint (trip, offersAll, dest) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${(basePrice)}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
+        <button class="event__reset-btn" type="reset">${isNewTrip ? 'Cansel' : 'Delete'}</button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
@@ -113,7 +112,7 @@ function createTripEditPoint (trip, offersAll, dest) {
           </div>
         </section>
 
-        <section class="event__section  event__section--destination">
+        <section class="event__section  event__section--destination ${destination === null ? 'visually-hidden' : ''}">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
           <p class="event__destination-description">${findDescription(destination, dest).description}</p>
 
@@ -136,22 +135,25 @@ export default class TripEditPoint extends AbstractStatefulView {
   #handleClick = null;
   #datapickerStart = null;
   #datapickerEnd = null;
-  #handleDelete = null;
+  #handleCansel = null;
+  #isNewTrip = null;
 
-  constructor ({trip, offers, destination, onSubmit, onClick, onDeleteClick}) {
+  constructor ({trip, offers, destination, onSubmit, onClick, onCanselClick}) {
     super();
 
     if(!trip) {
-      const dateNow = new Date()
+      const dateNow = new Date();
       trip = {
         id: nanoid(),
-        dateStart: dateNow,
         dateFrom: dateNow,
+        dateTo: dateNow,
         type: offers[0].type,
         offers: [],
         destination: null,
         price: 0
-      }
+      };
+
+      this.#isNewTrip = true;
     }
 
     this._setState(this.#parseTripToState({trip}));
@@ -159,13 +161,13 @@ export default class TripEditPoint extends AbstractStatefulView {
     this.#destination = destination;
     this.#handleSubmit = onSubmit;
     this.#handleClick = onClick;
-    this.#handleDelete = onDeleteClick;
+    this.#handleCansel = onCanselClick;
     this._restoreHandlers();
 
   }
 
   get template() {
-    return createTripEditPoint(this._state, this.#offer, this.#destination);
+    return createTripEditPoint(this._state, this.#offer, this.#destination, this.#isNewTrip);
   }
 
   removeElement() {
@@ -221,9 +223,9 @@ export default class TripEditPoint extends AbstractStatefulView {
     });
   };
 
-  #clickHandlerDelete = (evt) => {
+  #clickHandlerCansel = (evt) => {
     evt.preventDefault();
-    this.#handleDelete(this.#parseStateToTrip(this._state));
+    this.#handleCansel(this.#parseStateToTrip(this._state));
   };
 
   #changeHandlerPrice = (evt) => {
@@ -267,13 +269,13 @@ export default class TripEditPoint extends AbstractStatefulView {
 
 
   #dateFromChangeHandler = ([userDate]) => {
-    this.updateElement ({
+    this._setState ({
       dateFrom: dayjs(userDate).toJSON()
     });
   };
 
   #dateToChangeHandler = ([userDate]) => {
-    this.updateElement ({
+    this._setState ({
       dateTo: dayjs(userDate).toJSON()
     });
   };
@@ -282,6 +284,7 @@ export default class TripEditPoint extends AbstractStatefulView {
 
   #parseStateToTrip = (state) => {
     const trip = {...state};
+    console.log(trip);
     return trip;
   };
 
@@ -297,7 +300,7 @@ export default class TripEditPoint extends AbstractStatefulView {
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#inputHandlerDestination);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#clickHandlerOffer);
     this.element.querySelector('.event__input--price').addEventListener('input', this.#changeHandlerPrice);
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickHandlerDelete);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#clickHandlerCansel);
     this.#setDatepicker();
   }
 }

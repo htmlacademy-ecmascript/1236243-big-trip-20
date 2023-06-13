@@ -9,9 +9,6 @@ import { filter } from '../utils/filter.js';
 import TripInfo from '../view/trip-info.js';
 import NewButton from '../view/trip-new-button.js';
 import NewTripPresenter from './new-trip-presenter.js';
-import AddPoint from '../view/trip-add-point.js';
-import TripEditPoint from '../view/trip-edit-point.js';
-
 
 export default class MainPresenter {
   #tripListComponent = new TripList();
@@ -25,23 +22,23 @@ export default class MainPresenter {
   #tripPresenters = new Map();
   #currentSortType = SortType.DAY;
   #filterType = FilterType.EVERYTHING;
-  #tripInfoContainer = null
-  #tripInfo = null
-  #newButton = null
-  #newTripPresenter = null
+  #tripInfoContainer = null;
+  #tripInfo = null;
+  #newButton = null;
+  #newTripPresenter = null;
 
   constructor ({tripContainer, pointsModel, filterModel, tripInfoContainer}) {
     this.#tripContainer = tripContainer;
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
-    this.#tripInfoContainer = tripInfoContainer
+    this.#tripInfoContainer = tripInfoContainer;
 
     this.#newTripPresenter = new NewTripPresenter({
       tripListComponent: this.#tripListComponent.element,
       onSubmit: this.#handleViewAction,
       onDeleteClick: this.#handleDeleteClick
-    })
-    
+    });
+
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -64,10 +61,10 @@ export default class MainPresenter {
   init () {
     this.#destination = [...this.#pointsModel.description];
     this.#offers = [...this.#pointsModel.offers];
-    this.#renderTripInfo()
+    this.#renderTripInfo();
     this.#renderBoard();
     this.#renderSort();
-    this.#renderNewButton()
+    this.#renderNewButton();
   }
 
   #renderBoard () {
@@ -85,7 +82,7 @@ export default class MainPresenter {
       tripListComponent: this.#tripListComponent.element,
       onSubmit: this.#handleViewAction,
       onDeleteClick: this.#handleDeleteClick
-    })
+    });
 
     for (let i = 0; i < pointsCount; i++) {
       this.#renderTripList(points[i], this.#offers, this.#destination);
@@ -93,7 +90,7 @@ export default class MainPresenter {
   }
 
   #renderTripInfo () {
-    this.#tripInfo = new TripInfo()
+    this.#tripInfo = new TripInfo();
     render (this.#tripInfo, this.#tripInfoContainer, RenderPosition.AFTERBEGIN);
   }
 
@@ -124,14 +121,14 @@ export default class MainPresenter {
   #renderNewButton () {
     this.#newButton = new NewButton({
       onClick: this.#handleNewTripButton
-    })
-    render (this.#newButton, this.#tripInfoContainer, RenderPosition.BEFOREEND)
+    });
+    render (this.#newButton, this.#tripInfoContainer, RenderPosition.BEFOREEND);
   }
 
   #handleNewTripButton = () => {
-    this.#createNewTrip()
-    this.#newButton.element.disabled = true
-  }
+    this.#createNewTrip();
+    this.#newButton.element.disabled = true;
+  };
 
   #handleSortTypeChange = (sortType) => {
     if (this.#currentSortType === sortType) {
@@ -186,14 +183,15 @@ export default class MainPresenter {
         break;
     }
   };
+
   #handleDeleteClick = () => {
-    console.log('Delete');
-  }
+    this.#newButton.element.disabled = false;
+  };
 
   #createNewTrip = () => {
-    this.#currentSortType = SortType.DAY
-    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING)
-    this.#newTripPresenter.init(null, this.#offers, this.#destination)
-    
-  } 
+    this.#currentSortType = SortType.DAY;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#newTripPresenter.init(null, this.#offers, this.#destination);
+
+  };
 }
