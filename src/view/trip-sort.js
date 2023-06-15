@@ -19,7 +19,7 @@ function createTripSort () {
     </div>
 
     <div class="trip-sort__item  trip-sort__item--${SortType.PRICE}">
-      <input id="sort-${SortType.PRICE}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${SortType.PRICE}" data-sort-type="${SortType.PRICE}" >
+      <input id="sort-${SortType.PRICE}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${SortType.PRICE}" data-sort-type="${SortType.PRICE}">
       <label class="trip-sort__btn" for="sort-${SortType.PRICE}">${SortType.PRICE}</label>
     </div>
 
@@ -36,7 +36,6 @@ export default class TripSort extends AbstractView {
   constructor({onSortTypeChange}) {
     super();
     this.#handleSortTypeChange = onSortTypeChange;
-
     this.element.addEventListener('change', this.#sortTypeChange);
   }
 
@@ -48,6 +47,7 @@ export default class TripSort extends AbstractView {
     if(evt.target.tagName !== 'INPUT') {
       return;
     }
+
     evt.preventDefault();
     this.#handleSortTypeChange(evt.target.dataset.sortType);
   };

@@ -1,6 +1,7 @@
 import TripEditPoint from '../view/trip-edit-point.js';
 import TripPoint from '../view/trip-point.js';
 import { render, replace, remove } from '../framework/render.js';
+import { UpdateType, UserAction } from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -48,7 +49,7 @@ export default class TripPresenter {
       destination: this.#destination,
       onSubmit: this.#handleFormSubmit,
       onClick: this.#handleHideEditForm,
-      onCanselClick: this.#handleCanselClick
+      onCanselClick: this.#handleDeleteClick
     });
 
     if (prevTripComponent === null || prevEditTripComponent === null) {
@@ -100,9 +101,15 @@ export default class TripPresenter {
       this.#replaceToTrip();
     }
   };
-  #handleCanselClick = () => {
-    this.resetView()
-  }
+
+  #handleDeleteClick = (trip) => {
+    this.#handleDataChange(
+      UserAction.DELETE_TRIP,
+      UpdateType.MINOR,
+      trip
+    );
+
+  };
 
   #handleEditClick = () => {
     this.#replaceToEdit();
@@ -110,7 +117,11 @@ export default class TripPresenter {
 
   #handleFormSubmit = (trip) => {
     this.#replaceToTrip();
-    this.#handleDataChange(trip);
+    this.#handleDataChange(
+      UserAction.UPDATE_TRIP,
+      UpdateType.MINOR,
+      trip
+    );
   };
 
   #handleHideEditForm = () => {
@@ -118,6 +129,10 @@ export default class TripPresenter {
   };
 
   #handleFavoritClick = () => {
-    this.#handleDataChange({...this.#trip, isFavorite: !this.#trip.isFavorite});
+    this.#handleDataChange(
+      UserAction.UPDATE_TRIP,
+      UpdateType.PATCH,
+      {...this.#trip, isFavorite: !this.#trip.isFavorite}
+    );
   };
 }
