@@ -5,6 +5,7 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
+import he from 'he';
 
 const createAvaibleOffers = (offers, offersID, type) => {
   const offerByType = offers.find((offer) => offer.type === type).offers;
@@ -32,7 +33,7 @@ const createTypesList = (offers, type) => {
   return typesList;
 };
 const createOptionCity = (dest) => {
-  const optionCity = dest.map((item) => `<option value='${item.name}'></option>`);
+  const optionCity = dest.map((item) => `<option value='${he.encode(item.name)}'></option>`).join();
   return optionCity;
 };
 
@@ -77,7 +78,7 @@ function createTripEditPoint (trip, offersAll, dest, isNewTrip) {
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination === null ? '' : findDescription(destination,dest).name}" list="destination-list-1">
           <datalist id="destination-list-1">
-            ${(destination === null ? '' : createOptionCity(dest))}
+            ${createOptionCity(dest)}
           </datalist>
         </div>
 
@@ -94,7 +95,7 @@ function createTripEditPoint (trip, offersAll, dest, isNewTrip) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${(basePrice)}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -185,6 +186,9 @@ export default class TripEditPoint extends AbstractStatefulView {
 
   #submitHandler = (evt) => {
     evt.preventDefault();
+    if (!this._state.basePrice || !this._state.destination) {
+      return;
+    }
     this.#handleSubmit(this.#parseStateToTrip(this._state));
   };
 
@@ -284,7 +288,6 @@ export default class TripEditPoint extends AbstractStatefulView {
 
   #parseStateToTrip = (state) => {
     const trip = {...state};
-    console.log(trip);
     return trip;
   };
 

@@ -159,7 +159,7 @@ export default class MainPresenter {
         this.#pointsModel.updateTrip(updateType, update);
         break;
       case UserAction.ADD_TRIP:
-        this.#pointsModel.addTrip(updateType. update);
+        this.#pointsModel.addTrip(updateType, update);
         break;
       case UserAction.DELETE_TRIP:
         this.#pointsModel.deleteTrip(updateType, update);

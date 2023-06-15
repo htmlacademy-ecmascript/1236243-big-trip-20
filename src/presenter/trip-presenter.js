@@ -49,7 +49,7 @@ export default class TripPresenter {
       destination: this.#destination,
       onSubmit: this.#handleFormSubmit,
       onClick: this.#handleHideEditForm,
-      onDeleteClick: this.#handleDeleteClick
+      onCanselClick: this.#handleDeleteClick
     });
 
     if (prevTripComponent === null || prevEditTripComponent === null) {

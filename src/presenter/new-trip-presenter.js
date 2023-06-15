@@ -5,14 +5,14 @@ import TripEditPoint from '../view/trip-edit-point';
 
 
 export default class NewTripPresenter {
-  #triplistComponent = null;
+  #tripListComponent = null;
   #handleDataChange = null;
   #handleDestroy = null;
 
   #newTripComponent = null;
 
   constructor({tripListComponent, onSubmit, onDeleteClick}) {
-    this.#triplistComponent = tripListComponent,
+    this.#tripListComponent = tripListComponent,
     this.#handleDataChange = onSubmit,
     this.#handleDestroy = onDeleteClick;
   }
@@ -29,7 +29,7 @@ export default class NewTripPresenter {
       onCanselClick: this.#handleCanselClick
 
     });
-    render(this.#newTripComponent, this.#triplistComponent, RenderPosition.AFTERBEGIN);
+    render(this.#newTripComponent, this.#tripListComponent, RenderPosition.AFTERBEGIN);
     document.addEventListener('keydown', this.#escKeyDownHandler);
   }
 
