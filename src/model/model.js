@@ -10,6 +10,7 @@ export default class PointsModel extends Observable{
   constructor({tripApiService}) {
     super();
     this.#tripApiService = tripApiService;
+
   }
 
   get points () {
@@ -17,64 +18,71 @@ export default class PointsModel extends Observable{
   }
 
   get description() {
-    this.#descriptionsCity = this.#tripApiService.getDescription();
-    console.log(this.#descriptionsCity);
     return this.#descriptionsCity;
   }
 
   get offers() {
-    this.#offersAll = this.#tripApiService.getOffers();
     return this.#offersAll ;
   }
 
   async init() {
+    this.#descriptionsCity = await this.#tripApiService.getDestinations();
+    this.#offersAll = await this.#tripApiService.getOffers();
     try {
       const points = await this.#tripApiService.trips;
       this.#points = points.map(this.#adaptToClient);
-      console.log(this.#points);
     } catch(err) {
       this.#points = [];
+      // this.#descriptionsCity = null
+      // this.#offersAll = null
     }
-
     this._notify(UpdateType.INIT);
   }
 
-  updateTrip (updateType, update) {
-    const index = this.#points.findIndex((point) => point.id === update.id);
-
-    if(index === -1) {
-      throw new Error('Can\'t update unexistind trip');
-    }
-
-    this.#points = [
-      ...this.#points.slice(0, index),
-      update,
-      ...this.#points.slice(index + 1)
-    ];
-
-    this._notify(updateType, update);
-  }
-
-  addTrip (updateType, update) {
-    this.#points = [
-      update,
-      ...this.#points
-    ];
-
-    this._notify(updateType, update);
-  }
-
-  deleteTrip (updateType, update) {
+  async updateTrip (updateType, update) {
     const index = this.#points.findIndex((point) => point.id === update.id);
     if(index === -1) {
       throw new Error('Can\'t update unexistind trip');
     }
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      ...this.#points.slice(index + 1)
-    ];
-    this._notify(updateType);
+    try {
+      const responce = await this.#tripApiService.updateTrip(update);
+      const updatedTrip = this.#adaptToClient(responce);
+      this.#points = [
+        ...this.#points.slice(0, index),
+        updatedTrip,
+        ...this.#points.slice(index + 1)
+      ];
+    } catch(err) {
+      throw new Error('Can\'t update route point');
+    }
+    this._notify(updateType, update);
+  }
+
+  async addTrip (updateType, update) {
+    try {
+      const responce = await this.#tripApiService.addTrip(update);
+      const newTrip = this.#adaptToClient(responce);
+      this.#points = [newTrip, ...this.#points];
+      this._notify(updateType, update);
+    } catch(err) {
+      throw new Error('Can\'t add task');
+    }
+  }
+
+  async deleteTrip (updateType, update) {
+    const index = this.#points.findIndex((point) => point.id === update.id);
+    if(index === -1) {
+      throw new Error('Can\'t update unexistind trip');
+    }
+    try {
+      await this.#tripApiService.deleteTrip(update);
+      this.#points.splice(index, 1);
+      this._notify(updateType);
+    } catch(err) {
+      throw new Error('Can\'t delete task');
+    }
+
   }
 
   #adaptToClient(trip) {

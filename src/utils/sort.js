@@ -7,4 +7,10 @@ function sortByPrice (pointsA, pointsB) {
 function sortByTime (pointA, pointB) {
   return dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom)) - dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom));
 }
-export {sortByPrice, sortByTime};
+
+function sortDay (firstPoint, secondPoint) {
+  const firstPointDate = dayjs(firstPoint.dateFrom);
+  const secondPointDate = dayjs(secondPoint.dateFrom);
+  return firstPointDate.valueOf() - secondPointDate.valueOf();
+}
+export {sortByPrice, sortByTime, sortDay};

@@ -1,8 +1,11 @@
 import ApiService from './framework/api-service.js';
+import dayjs from 'dayjs';
 
 const Method = {
   GET: 'GET',
-  PUT: 'PUT'
+  PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE'
 };
 
 export default class TripApiService extends ApiService {
@@ -11,36 +14,54 @@ export default class TripApiService extends ApiService {
       .then(ApiService.parseResponse);
   }
 
-  getOffers() {
+  async getOffers () {
     return this._load({url: 'offers'})
       .then(ApiService.parseResponse);
   }
 
-  getDescriptions() {
+  async getDestinations() {
     return this._load({url: 'destinations'})
       .then(ApiService.parseResponse);
   }
 
   async updateTrip(trip) {
     const response = await this._load({
-      url: `trips/${trip.id}`,
+      url: `points/${trip.id}`,
       method: Method.PUT,
       body: JSON.stringify(this.#adaptToServer(trip)),
       headers: new Headers({'Content-Type': 'application/json'})
     });
 
-    const parsedResponse = await ApiService.parseResponse(response);
-    return parsedResponse;
+    return await ApiService.parseResponse(response);
+  }
+
+  async addTrip(trip) {
+    const response = await this._load({
+      url: 'points',
+      method: Method.POST,
+      body: JSON.stringify(this.#adaptToServer(trip)),
+      headers: new Headers({'Content-Type': 'Application/json'})
+    });
+
+    return await ApiService.parseResponse(response);
+  }
+
+  async deleteTrip (trip) {
+    return await this._load({
+      url: `points/${trip.id}`,
+      method: Method.DELETE
+    });
   }
 
   #adaptToServer (trip) {
     const adaptedTrip = {...trip,
-      'base_price': trip.basePrice,
-      'date_from': trip.dateFrom,
-      'date_to': trip.dateTo,
-      'is_favorite': trip.isFavorite
+      'base_price': Number(trip.basePrice),
+      'date_from': dayjs(trip.dateFrom).toJSON(),
+      'date_to': dayjs(trip.dateTo).toJSON(),
+      'is_favorite': trip.isFavorite ?? false
     };
 
+    delete adaptedTrip.price;
     delete adaptedTrip.basePrice;
     delete adaptedTrip.dateFrom;
     delete adaptedTrip.dateTo;
