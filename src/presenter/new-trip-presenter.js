@@ -12,8 +12,8 @@ export default class NewTripPresenter {
   #newTripComponent = null;
 
   constructor({tripListComponent, onSubmit, onDeleteClick}) {
-    this.#tripListComponent = tripListComponent,
-    this.#handleDataChange = onSubmit,
+    this.#tripListComponent = tripListComponent;
+    this.#handleDataChange = onSubmit;
     this.#handleDestroy = onDeleteClick;
   }
 
