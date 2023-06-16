@@ -1,14 +1,17 @@
-import { CITY_DESCRIPTION } from '../mock/descriptions.js';
-import { OFFERS } from '../mock/offers.js';
-import { getRandomPoint } from '../mock/trip.js';
+import { UpdateType } from '../const.js';
 import Observable from '../framework/observable.js';
 
-const TRIP = 4;
-
 export default class PointsModel extends Observable{
-  #points = Array.from({length: TRIP}, getRandomPoint);
-  #offersAll = OFFERS;
-  #descriptionsCity = CITY_DESCRIPTION;
+  #tripApiService = null;
+  #points = [];
+  #offersAll = null;
+  #descriptionsCity = null;
+
+  constructor({tripApiService}) {
+    super();
+    this.#tripApiService = tripApiService;
+
+  }
 
   get points () {
     return this.#points;
@@ -19,46 +22,81 @@ export default class PointsModel extends Observable{
   }
 
   get offers() {
-    return this.#offersAll;
+    return this.#offersAll ;
   }
 
-  updateTrip (updateType, update) {
-    const index = this.#points.findIndex((point) => point.id === update.id);
+  async init() {
+    this.#descriptionsCity = await this.#tripApiService.getDestinations();
+    this.#offersAll = await this.#tripApiService.getOffers();
+    try {
+      const points = await this.#tripApiService.trips;
+      this.#points = points.map(this.#adaptToClient);
+    } catch(err) {
+      this.#points = [];
+      // this.#descriptionsCity = null
+      // this.#offersAll = null
+    }
+    this._notify(UpdateType.INIT);
+  }
 
+  async updateTrip (updateType, update) {
+    const index = this.#points.findIndex((point) => point.id === update.id);
     if(index === -1) {
       throw new Error('Can\'t update unexistind trip');
     }
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      update,
-      ...this.#points.slice(index + 1)
-    ];
-
+    try {
+      const responce = await this.#tripApiService.updateTrip(update);
+      const updatedTrip = this.#adaptToClient(responce);
+      this.#points = [
+        ...this.#points.slice(0, index),
+        updatedTrip,
+        ...this.#points.slice(index + 1)
+      ];
+    } catch(err) {
+      throw new Error('Can\'t update route point');
+    }
     this._notify(updateType, update);
   }
 
-  addTrip (updateType, update) {
-    this.#points = [
-      update,
-      ...this.#points
-    ];
-
-    this._notify(updateType, update);
+  async addTrip (updateType, update) {
+    try {
+      const responce = await this.#tripApiService.addTrip(update);
+      const newTrip = this.#adaptToClient(responce);
+      this.#points = [newTrip, ...this.#points];
+      this._notify(updateType, update);
+    } catch(err) {
+      throw new Error('Can\'t add task');
+    }
   }
 
-  deleteTrip (updateType, update) {
+  async deleteTrip (updateType, update) {
     const index = this.#points.findIndex((point) => point.id === update.id);
-
     if(index === -1) {
       throw new Error('Can\'t update unexistind trip');
     }
+    try {
+      await this.#tripApiService.deleteTrip(update);
+      this.#points.splice(index, 1);
+      this._notify(updateType);
+    } catch(err) {
+      throw new Error('Can\'t delete task');
+    }
 
-    this.#points = [
-      ...this.#points.slice(0, index),
-      ...this.#points.slice(index + 1)
-    ];
+  }
 
-    this._notify(updateType);
+  #adaptToClient(trip) {
+    const adaptedTrip = {...trip,
+      basePrice: trip['base_price'],
+      dateFrom: trip['date_from'],
+      dateTo: trip['date_to'],
+      isFavorite: trip['is_favorite']
+    };
+
+    delete adaptedTrip['base_price'];
+    delete adaptedTrip['date_from'];
+    delete adaptedTrip['date_to'];
+    delete adaptedTrip['is_favorite'];
+    return adaptedTrip;
   }
 }

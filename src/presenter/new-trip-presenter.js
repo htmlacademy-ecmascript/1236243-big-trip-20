@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { UpdateType, UserAction } from '../const';
 import { RenderPosition, remove, render } from '../framework/render';
 import TripEditPoint from '../view/trip-edit-point';
@@ -12,8 +11,8 @@ export default class NewTripPresenter {
   #newTripComponent = null;
 
   constructor({tripListComponent, onSubmit, onDeleteClick}) {
-    this.#tripListComponent = tripListComponent,
-    this.#handleDataChange = onSubmit,
+    this.#tripListComponent = tripListComponent;
+    this.#handleDataChange = onSubmit;
     this.#handleDestroy = onDeleteClick;
   }
 
@@ -49,7 +48,7 @@ export default class NewTripPresenter {
     this.#handleDataChange(
       UserAction.ADD_TRIP,
       UpdateType.MINOR,
-      {id: nanoid(), ...trip}
+      trip,
     );
     this.destroy();
   };

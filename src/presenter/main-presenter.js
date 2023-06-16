@@ -3,12 +3,13 @@ import TripSort from '../view/trip-sort.js';
 import { RenderPosition, remove, render } from '../framework/render.js';
 import TripEmptyList from '../view/trip-empty-list.js';
 import TripPresenter from './trip-presenter.js';
-import { sortByPrice, sortByTime } from '../utils/sort.js';
+import { sortByPrice, sortByTime, sortDay } from '../utils/sort.js';
 import { FilterType, SortType, UpdateType, UserAction } from '../const.js';
 import { filter } from '../utils/filter.js';
 import TripInfo from '../view/trip-info.js';
 import NewButton from '../view/trip-new-button.js';
 import NewTripPresenter from './new-trip-presenter.js';
+import TripLoading from '../view/trip-loading.js';
 
 export default class MainPresenter {
   #tripListComponent = new TripList();
@@ -26,6 +27,8 @@ export default class MainPresenter {
   #tripInfo = null;
   #newButton = null;
   #newTripPresenter = null;
+  #pointsLoading = new TripLoading();
+  #isLoading = true;
 
   constructor ({tripContainer, pointsModel, filterModel, tripInfoContainer}) {
     this.#tripContainer = tripContainer;
@@ -46,10 +49,12 @@ export default class MainPresenter {
 
   get points() {
     this.#filterType = this.#filterModel.filter;
-    const points = this.#pointsModel.points;
+    const points = [...this.#pointsModel.points];
     const filteredPoints = filter[this.#filterType](points);
 
     switch(this.#currentSortType) {
+      case SortType.DAY:
+        return filteredPoints.sort(sortDay);
       case SortType.TIME:
         return filteredPoints.sort(sortByTime);
       case SortType.PRICE:
@@ -58,17 +63,28 @@ export default class MainPresenter {
     return filteredPoints;
   }
 
+  get destination() {
+    return this.#pointsModel.description;
+  }
+
+  get offers() {
+    return this.#pointsModel.offers;
+  }
+
   init () {
-    this.#destination = [...this.#pointsModel.description];
-    this.#offers = [...this.#pointsModel.offers];
     this.#renderTripInfo();
-    this.#renderBoard();
-    this.#renderSort();
     this.#renderNewButton();
+    this.#renderBoard();
+
   }
 
   #renderBoard () {
     render(this.#tripListComponent, this.#tripContainer);
+
+    if(this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
 
     const points = this.points;
     const pointsCount = points.length;
@@ -84,9 +100,11 @@ export default class MainPresenter {
       onDeleteClick: this.#handleDeleteClick
     });
 
+    this.#renderSort();
     for (let i = 0; i < pointsCount; i++) {
-      this.#renderTripList(points[i], this.#offers, this.#destination);
+      this.#renderTripList(points[i], this.offers, this.destination);
     }
+
   }
 
   #renderTripInfo () {
@@ -125,6 +143,10 @@ export default class MainPresenter {
     render (this.#newButton, this.#tripInfoContainer, RenderPosition.BEFOREEND);
   }
 
+  #renderLoading () {
+    return render(this.#pointsLoading, this.#tripContainer, RenderPosition.AFTERBEGIN);
+  }
+
   #handleNewTripButton = () => {
     this.#createNewTrip();
     this.#newButton.element.disabled = true;
@@ -142,7 +164,10 @@ export default class MainPresenter {
   #clearBoard = ({resetSortType = false} = {}) => {
     this.#tripPresenters.forEach((presenter) => presenter.destroy());
     this.#tripPresenters.clear();
+
+    remove(this.#sortComponent);
     remove(this.#emptyListComponent);
+    remove(this.#pointsLoading);
     if(resetSortType) {
       this.#currentSortType = SortType.DAY;
     }
@@ -179,6 +204,11 @@ export default class MainPresenter {
         break;
       case UpdateType.MAJOR:
         this.#clearBoard({resetSortType: true});
+        this.#renderBoard();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#pointsLoading);
         this.#renderBoard();
         break;
     }
