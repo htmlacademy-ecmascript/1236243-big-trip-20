@@ -26,7 +26,6 @@ export default class NewTripPresenter {
       destination,
       onSubmit: this.#handleFormSubmit,
       onCanselClick: this.#handleCanselClick
-
     });
     render(this.#newTripComponent, this.#tripListComponent, RenderPosition.AFTERBEGIN);
     document.addEventListener('keydown', this.#escKeyDownHandler);
@@ -36,11 +35,10 @@ export default class NewTripPresenter {
     if (this.#newTripComponent === null) {
       return;
     }
-
-    // this.#handleDestroy();
+    this.#handleDestroy()
     remove(this.#newTripComponent);
     this.#newTripComponent = null;
-
+    
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
@@ -69,7 +67,7 @@ export default class NewTripPresenter {
       UpdateType.MINOR,
       trip,
     );
-    this.destroy();
+    this.destroy()
   };
 
   #handleCanselClick = () => {
