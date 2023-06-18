@@ -10,6 +10,12 @@ import TripInfo from '../view/trip-info.js';
 import NewButton from '../view/trip-new-button.js';
 import NewTripPresenter from './new-trip-presenter.js';
 import TripLoading from '../view/trip-loading.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
 
 export default class MainPresenter {
   #tripListComponent = new TripList();
@@ -29,6 +35,10 @@ export default class MainPresenter {
   #newTripPresenter = null;
   #pointsLoading = new TripLoading();
   #isLoading = true;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor ({tripContainer, pointsModel, filterModel, tripInfoContainer}) {
     this.#tripContainer = tripContainer;
@@ -100,11 +110,11 @@ export default class MainPresenter {
       onDeleteClick: this.#handleDeleteClick
     });
 
-    this.#renderSort();
+
     for (let i = 0; i < pointsCount; i++) {
       this.#renderTripList(points[i], this.offers, this.destination);
     }
-
+    this.#renderSort();
   }
 
   #renderTripInfo () {
@@ -131,7 +141,8 @@ export default class MainPresenter {
 
   #renderSort () {
     this.#sortComponent = new TripSort({
-      onSortTypeChange: this.#handleSortTypeChange
+      onSortTypeChange: this.#handleSortTypeChange,
+      currentSort: this.#currentSortType
     });
     render(this.#sortComponent, this.#tripContainer, RenderPosition.AFTERBEGIN);
   }
@@ -177,26 +188,44 @@ export default class MainPresenter {
     this.#tripPresenters.forEach((presenter) => presenter.resetView());
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
     //вызываем обновление модели
     switch (actionType) {
       case UserAction.UPDATE_TRIP:
-        this.#pointsModel.updateTrip(updateType, update);
+        this.#tripPresenters.get(update.id).setSaving();
+        try{
+          await this.#pointsModel.updateTrip(updateType, update);
+        } catch(err) {
+          this.#tripPresenters.get(update.id).setAborting();
+        }
         break;
       case UserAction.ADD_TRIP:
-        this.#pointsModel.addTrip(updateType, update);
+        this.#newTripPresenter.setSaving();
+        try {
+          await this.#pointsModel.addTrip(updateType, update);
+        } catch(err) {
+          this.#newTripPresenter.setAborting();
+        }
         break;
       case UserAction.DELETE_TRIP:
-        this.#pointsModel.deleteTrip(updateType, update);
+        this.#tripPresenters.get(update.id).setDeleting();
+        try {
+          await this.#pointsModel.deleteTrip(updateType, update);
+        } catch(err){
+          this.#tripPresenters.get(update.id).setAborting();
+        }
+        break;
     }
-
+    this.#uiBlocker.unblock();
+    this.#newButton.element.disabled = false;
   };
 
   #handleModelEvent = (updateType, data) => {
     // в зависимости от типа изменений решаем, что делать
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#tripPresenters.get(data.id).init(data, this.#offers, this.#destination);
+        this.#tripPresenters.get(data.id).init(data, this.offers, this.destination);
         break;
       case UpdateType.MINOR:
         this.#clearBoard();
@@ -221,7 +250,7 @@ export default class MainPresenter {
   #createNewTrip = () => {
     this.#currentSortType = SortType.DAY;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-    this.#newTripPresenter.init(null, this.#offers, this.#destination);
+    this.#newTripPresenter.init(null, this.offers, this.destination);
 
   };
 }

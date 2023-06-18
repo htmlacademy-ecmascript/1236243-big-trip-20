@@ -37,11 +37,30 @@ export default class NewTripPresenter {
       return;
     }
 
-    this.#handleDestroy();
+    // this.#handleDestroy();
     remove(this.#newTripComponent);
     this.#newTripComponent = null;
 
     document.removeEventListener('keydown', this.#escKeyDownHandler);
+  }
+
+  setSaving () {
+    this.#newTripComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#newTripComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#newTripComponent.shake(resetFormState);
   }
 
   #handleFormSubmit = (trip) => {

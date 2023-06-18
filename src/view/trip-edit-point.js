@@ -4,17 +4,16 @@ import { humanizeTaskDueDate } from '../utils/dateUtils.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import dayjs from 'dayjs';
-import { nanoid } from 'nanoid';
 import he from 'he';
 
-const createAvaibleOffers = (offers, offersID, type) => {
+const createAvaibleOffers = (offers, offersID, type, isDisabled) => {
   const offerByType = offers.find((offer) => offer.type === type).offers;
   const arrayOffers = [];
 
   for (let i = 0; i < offerByType.length; i++) {
     const isChecked = offersID.includes(offerByType[i].id) ? 'checked' : '';
     arrayOffers.push(`<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="${offerByType[i].id}" type="checkbox" name="${offerByType[i].type}" ${isChecked}> 
+        <input class="event__offer-checkbox  visually-hidden" id="${offerByType[i].id}" type="checkbox" name="${offerByType[i].type}" ${isChecked} ${isDisabled ? 'disabled' : ''}> 
         <label class="event__offer-label" for="${offerByType[i].id}">
           <span class="event__offer-title">${offerByType[i].title}</span>
           &plus;&euro;&nbsp;
@@ -27,7 +26,7 @@ const createAvaibleOffers = (offers, offersID, type) => {
 };
 const createTypesList = (offers, type) => {
   const typesList = offers.map((offer, index) => `<div class="event__type-${offer.type}">
-    <input id="event-type-${offer.type}-${index + 1}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${offer.type}" ${offer.type === type ? 'checked' : ''} ">
+    <input id="event-type-${offer.type}-${index + 1}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${offer.type}" ${offer.type === type ? 'checked' : ''}>
     <label class="event__type-label  event__type-label--${offer.type}" for="event-type-${offer.type}-${index + 1}" data-offer-type="${offer.type}" >${offer.type}</label>
     </div>`).join('');
   return typesList;
@@ -45,15 +44,18 @@ const createFotoElement = (destination, dest) => {
   const fotoTemplate = cityFotos.map((item) => `<img class="event__photo" src='${item.src}' alt='${item.description}'></img>`);
   return fotoTemplate;
 };
+const createRollupBtn = (isNewTrip) => isNewTrip ? '' : '<button class="event__rollup-btn" type="button" ><span class="visually-hidden">Open event</span></button>';
 
 function createTripEditPoint (trip, offersAll, dest, isNewTrip) {
 
-  const {type, offers: offersId, destination, dateFrom, dateTo, basePrice} = trip;
+  const {type, offers: offersId, destination, dateFrom, dateTo, basePrice, isDisabled, isSaving, isDeleting} = trip;
 
   const dateFormat = 'DD/MM/YY HH:MM';
   const dateStart = humanizeTaskDueDate(dateFrom, dateFormat);
   const dateEnd = humanizeTaskDueDate(dateTo, dateFormat);
-
+  const templateButtons = isNewTrip
+    ? `<button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? 'Saving...' : 'Save'}</button><button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>Cansel</button>`
+    : `<button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? 'Saving...' : 'Save'}</button><button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isDeleting ? 'Deleting' : 'Delete'}</button>`;
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
@@ -62,7 +64,7 @@ function createTripEditPoint (trip, offersAll, dest, isNewTrip) {
             <span class="visually-hidden">Choose event type</span>
             <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
           </label>
-          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? 'disabled' : ''}>
 
           <div class="event__type-list">
             <fieldset class="event__type-group">
@@ -76,7 +78,7 @@ function createTripEditPoint (trip, offersAll, dest, isNewTrip) {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination === null ? '' : findDescription(destination,dest).name}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination === null ? '' : findDescription(destination,dest).name}" list="destination-list-1" ${isDisabled ? 'disabled' : ''}>
           <datalist id="destination-list-1">
             ${createOptionCity(dest)}
           </datalist>
@@ -84,10 +86,10 @@ function createTripEditPoint (trip, offersAll, dest, isNewTrip) {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateStart}">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateStart}" ${isDisabled ? 'disabled' : ''}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateEnd}">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateEnd}" ${isDisabled ? 'disabled' : ''}>
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -95,21 +97,18 @@ function createTripEditPoint (trip, offersAll, dest, isNewTrip) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}" ${isDisabled ? 'disabled' : ''}>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${isNewTrip ? 'Cansel' : 'Delete'}</button>
-        <button class="event__rollup-btn" type="button">
-          <span class="visually-hidden">Open event</span>
-        </button>
+        ${templateButtons}
+        ${createRollupBtn(isNewTrip)}
       </header>
       <section class="event__details">
         <section class="event__section  event__section--offers">
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
           <div class="event__available-offers">
-            ${createAvaibleOffers(offersAll, offersId, type)}
+            ${createAvaibleOffers(offersAll, offersId, type, isDisabled)}
           </div>
         </section>
 
@@ -145,7 +144,6 @@ export default class TripEditPoint extends AbstractStatefulView {
     if(!trip) {
       const dateNow = new Date();
       trip = {
-        id: nanoid(),
         dateFrom: dateNow,
         dateTo: dateNow,
         type: offers[0].type,
@@ -284,10 +282,19 @@ export default class TripEditPoint extends AbstractStatefulView {
     });
   };
 
-  #parseTripToState = ({trip}) => ({...trip});
+  #parseTripToState = ({trip}) => ({
+    ...trip,
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
+  });
 
   #parseStateToTrip = (state) => {
     const trip = {...state};
+
+    delete trip.isDisabled;
+    delete trip.isSaving;
+    delete trip.isDeleting;
     return trip;
   };
 
@@ -298,7 +305,10 @@ export default class TripEditPoint extends AbstractStatefulView {
 
   _restoreHandlers () {
     this.element.querySelector('.event').addEventListener('submit', this.#submitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#clickHandler);
+    const rollupBtn = this.element.querySelector('.event__rollup-btn');
+    if (rollupBtn) {
+      rollupBtn.addEventListener('click', this.#clickHandler);
+    }
     this.element.querySelector('.event__type-group').addEventListener('change', this.#clickHandlerType);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#inputHandlerDestination);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#clickHandlerOffer);
