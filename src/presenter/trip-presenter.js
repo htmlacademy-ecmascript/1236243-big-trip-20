@@ -75,6 +75,41 @@ export default class TripPresenter {
     remove(this.#tripEditComponent);
   }
 
+  setSaving () {
+    if (this.#mode === Mode.EDITTING) {
+      this.#tripEditComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting () {
+    if (this.#mode === Mode.EDITTING) {
+      this.#tripEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#tripComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#tripEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#tripEditComponent.shake(resetFormState);
+  }
+
   #replaceToEdit() {
     replace(this.#tripEditComponent, this.#tripComponent);
     document.addEventListener('keydown', this.#escKeyHandler);
@@ -116,7 +151,6 @@ export default class TripPresenter {
   };
 
   #handleFormSubmit = (trip) => {
-    this.#replaceToTrip();
     this.#handleDataChange(
       UserAction.UPDATE_TRIP,
       UpdateType.MINOR,
