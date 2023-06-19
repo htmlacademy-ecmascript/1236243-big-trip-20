@@ -35,10 +35,10 @@ export default class NewTripPresenter {
     if (this.#newTripComponent === null) {
       return;
     }
-    this.#handleDestroy()
+    this.#handleDestroy();
     remove(this.#newTripComponent);
     this.#newTripComponent = null;
-    
+
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
@@ -67,7 +67,7 @@ export default class NewTripPresenter {
       UpdateType.MINOR,
       trip,
     );
-    this.destroy()
+    this.destroy();
   };
 
   #handleCanselClick = () => {
