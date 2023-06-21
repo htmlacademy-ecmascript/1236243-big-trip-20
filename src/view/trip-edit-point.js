@@ -97,7 +97,7 @@ function createTripEditPoint (trip, offersAll, dest, isNewTrip) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}" ${isDisabled ? 'disabled' : ''}>
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}" min="1"${isDisabled ? 'disabled' : ''}>
         </div>
 
         ${templateButtons}
@@ -232,9 +232,6 @@ export default class TripEditPoint extends AbstractStatefulView {
 
   #changeHandlerPrice = (evt) => {
     evt.preventDefault();
-    if (evt.target.value <= 0) {
-      return;
-    }
     this._setState({
       basePrice: evt.target.value
     });
