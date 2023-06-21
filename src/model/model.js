@@ -26,13 +26,15 @@ export default class PointsModel extends Observable{
   }
 
   async init() {
-    this.#descriptionsCity = await this.#tripApiService.getDestinations();
-    this.#offersAll = await this.#tripApiService.getOffers();
     try {
       const points = await this.#tripApiService.trips;
       this.#points = points.map(this.#adaptToClient);
+      this.#descriptionsCity = await this.#tripApiService.getDestinations();
+      this.#offersAll = await this.#tripApiService.getOffers();
     } catch(err) {
+      this._notify(UpdateType.ERROR);
       this.#points = [];
+      return;
     }
     this._notify(UpdateType.INIT);
   }

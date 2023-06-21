@@ -11,6 +11,7 @@ import NewButton from '../view/trip-new-button.js';
 import NewTripPresenter from './new-trip-presenter.js';
 import TripLoading from '../view/trip-loading.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import TripError from '../view/trip-server-error.js';
 
 const TimeLimit = {
   LOWER_LIMIT: 350,
@@ -32,6 +33,7 @@ export default class MainPresenter {
   #newButton = null;
   #newTripPresenter = null;
   #pointsLoading = new TripLoading();
+  #serverError = new TripError();
   #isLoading = true;
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
@@ -102,6 +104,9 @@ export default class MainPresenter {
       this.#renderNoTrip();
       return;
     }
+
+    remove(this.#emptyListComponent);
+
     this.#newTripPresenter = new NewTripPresenter({
       tripListComponent: this.#tripListComponent.element,
       onSubmit: this.#handleViewAction,
@@ -154,6 +159,10 @@ export default class MainPresenter {
 
   #renderLoading () {
     return render(this.#pointsLoading, this.#tripContainer, RenderPosition.AFTERBEGIN);
+  }
+
+  #renderError () {
+    return render(this.#serverError, this.#tripContainer, RenderPosition.AFTERBEGIN);
   }
 
   #handleNewTripButton = () => {
@@ -236,6 +245,11 @@ export default class MainPresenter {
         this.#isLoading = false;
         remove(this.#pointsLoading);
         this.#renderBoard();
+        break;
+      case UpdateType.ERROR:
+        this.#isLoading = false;
+        remove(this.#pointsLoading);
+        this.#renderError();
         break;
     }
   };
