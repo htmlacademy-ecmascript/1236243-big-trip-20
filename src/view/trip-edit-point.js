@@ -269,7 +269,6 @@ export default class TripEditPoint extends AbstractStatefulView {
     );
   };
 
-
   #dateFromChangeHandler = ([userDate]) => {
     this._setState ({
       dateFrom: dayjs(userDate).toJSON()
