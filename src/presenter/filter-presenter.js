@@ -55,7 +55,6 @@ export default class FilterPresenter {
       currentFilterType: this.#filterModel.filter,
       onFilterTypeChange: this.#handleFilterChange
     });
-
     if (prevFilterComponent === null) {
       render(this.#filterComponent, this.#filterContainer);
       return;

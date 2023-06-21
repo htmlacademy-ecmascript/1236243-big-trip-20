@@ -22,8 +22,6 @@ export default class MainPresenter {
   #tripContainer = null;
   #pointsModel = null;
   #filterModel = null;
-  #destination = null;
-  #offers = null;
   #sortComponent = null;
   #emptyListComponent = null;
   #tripPresenters = new Map();
@@ -161,6 +159,7 @@ export default class MainPresenter {
   #handleNewTripButton = () => {
     this.#createNewTrip();
     this.#newButton.element.disabled = true;
+    remove(this.#emptyListComponent);
   };
 
   #handleSortTypeChange = (sortType) => {
@@ -175,7 +174,6 @@ export default class MainPresenter {
   #clearBoard = ({resetSortType = false} = {}) => {
     this.#tripPresenters.forEach((presenter) => presenter.destroy());
     this.#tripPresenters.clear();
-
     remove(this.#sortComponent);
     remove(this.#emptyListComponent);
     remove(this.#pointsLoading);
@@ -190,7 +188,6 @@ export default class MainPresenter {
 
   #handleViewAction = async (actionType, updateType, update) => {
     this.#uiBlocker.block();
-    //вызываем обновление модели
     switch (actionType) {
       case UserAction.UPDATE_TRIP:
         this.#tripPresenters.get(update.id).setSaving();
@@ -251,6 +248,5 @@ export default class MainPresenter {
     this.#currentSortType = SortType.DAY;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     this.#newTripPresenter.init(null, this.offers, this.destination);
-
   };
 }

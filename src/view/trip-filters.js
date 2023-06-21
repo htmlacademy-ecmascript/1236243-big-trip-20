@@ -22,12 +22,11 @@ export default class FiltersTrip extends AbstractView {
   #currentFilterType = null;
   #handleFilterTypeChange = null;
 
-  constructor ({filters, currentFilterTypes, onFilterTypeChange}) {
+  constructor ({filters, currentFilterType, onFilterTypeChange}) {
     super();
     this.#filters = filters;
-    this.#currentFilterType = currentFilterTypes;
+    this.#currentFilterType = currentFilterType;
     this.#handleFilterTypeChange = onFilterTypeChange;
-
     this.element.addEventListener('change', this.#filterTypeChangeHandler);
   }
 
