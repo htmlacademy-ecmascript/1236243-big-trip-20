@@ -232,6 +232,9 @@ export default class TripEditPoint extends AbstractStatefulView {
 
   #changeHandlerPrice = (evt) => {
     evt.preventDefault();
+    if (evt.target.value <= 0) {
+      return;
+    }
     this._setState({
       basePrice: evt.target.value
     });
